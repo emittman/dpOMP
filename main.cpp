@@ -5,6 +5,7 @@ typedef std::vector<float> fvec;
 typedef std::vector<unsigned int> uvec;
 typedef std::vector<int> ivec;
 
+
 int main(){
   int N = 10;
   
