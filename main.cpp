@@ -1,10 +1,14 @@
 #include <vector>
-#include <iostream>
+#include <ostream>
+
+typedef std::vector<float> fvec;
+typedef std::vector<unsigned int> uvec;
+typedef std::vector<int> ivec;
 
 int main(){
   int N = 10;
   
-  std::vector<int> vec(N);
+  uvec vec(N);
   
 #pragma omp parallel for
   for(int i=0; i<N; i++)
