@@ -1,5 +1,5 @@
 #include <vector>
-#include <ostream>
+#include <iostream>
 
 typedef std::vector<float> fvec;
 typedef std::vector<unsigned int> uvec;
@@ -11,11 +11,12 @@ int main(){
   
   uvec vec(N);
   
-#pragma omp parallel for
-  for(int i=0; i<N; i++)
-    vec[i] = i * i;
-  
   #pragma omp parallel for
+  for(int i=0; i<N; i++){
+    vec[i] = i * i;
+    std::cout <<"tid: " << i <<"\n";
+  }
+  
   for(int i=0; i<6; i++){
     std::cout << "In thread " << i << " the value is: " << vec[i] << ".\n\n";
   }
