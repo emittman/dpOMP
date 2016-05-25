@@ -1,10 +1,10 @@
-#include <vector>
+#include <armadillo>
 #include <iostream>
 
 int main(){
   int N = 10;
   
-  std::vector<int> vec(N);
+  arma::uvec vec(N);
   
 #pragma omp parallel for
   for(int i=0; i<N; i++)
