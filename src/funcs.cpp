@@ -7,7 +7,7 @@
 typedef std::vector<float> fvec;
 typedef std::vector<int> ivec;
 
-extern "C" SEXP n_squares(SEXP n){
+extern "C" SEXP n_squaresR(SEXP n){
 
   int nn = INTEGER(n)[0];
 
@@ -16,7 +16,7 @@ extern "C" SEXP n_squares(SEXP n){
   #pragma omp parallel for
   for(int i=0; i<nn; i++){
     vec[i] = i * i;
-    std::cout <<"tid: " << i <<"\n";
+    //std::cout <<"tid: " << i <<"\n";
   }
   
   SEXP result = PROTECT(allocVector(INTSXP, nn));

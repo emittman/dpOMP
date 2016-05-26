@@ -1,31 +1,30 @@
-\name{anRpackage-package}
-\alias{anRpackage-package}
-\alias{anRpackage}
+\name{dpOMP-package}
+\alias{dpOMP-package}
+\alias{dpOMP}
 \docType{package}
 \title{
-\packageTitle{anRpackage}
+\packageTitle{dpOMP}
 }
 \description{
-\packageDescription{anRpackage}
+\packageDescription{dpOMP}
 }
 \details{
 
 The DESCRIPTION file:
-\packageDESCRIPTION{anRpackage}
-\packageIndices{anRpackage}
+\packageDESCRIPTION{dpOMP}
+\packageIndices{dpOMP}
 ~~ An overview of how to use the package, including the most important ~~
 ~~ functions ~~
 }
 \author{
-\packageAuthor{anRpackage}
+\packageAuthor{dpOMP}
 
-Maintainer: \packageMaintainer{anRpackage}
+Maintainer: \packageMaintainer{dpOMP}
 }
 \references{
 ~~ Literature or other references for background information ~~
 }
-~~ Optionally other standard keywords, one per line, from file ~~
-~~ KEYWORDS in the R documentation directory ~~
+
 \keyword{ package }
 \seealso{
 ~~ Optional links to other man pages, e.g. ~~
