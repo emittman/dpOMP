@@ -7,6 +7,7 @@
 typedef std::vector<float> fvec;
 typedef std::vector<int> ivec;
 
+
 extern "C" SEXP n_squaresR(SEXP n){
 
   int nn = INTEGER(n)[0];

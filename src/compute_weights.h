@@ -7,7 +7,7 @@
  */
 
 void compute_weights(fvec &weights, fvec &yTx, fvec &xTx, fvec &beta, fvec &pi, int G, int K, int n, int V){
-#pragma omp for
+#pragma omp parallel for
   for(int g=0; g<G; g++){
 
     fvec yTx_g(&yTx[V*g], &yTx[V*g + V ]);

@@ -42,22 +42,6 @@ extern "C" SEXP dpgmmR(SEXP data, SEXP design, SEXP G, SEXP K, SEXP N, SEXP V){
   return list_out;
 }
 
-extern "C" SEXP quad_formR(SEXP A, SEXP X, SEXP SIZE){
-  double *AA, *XX;
-  int size;
-  AA = NUMERIC_POINTER(A);
-  XX = NUMERIC_POINTER(X);
-  size = INTEGER(SIZE)[0];
-  fvec a_in(AA, AA + size*size);
-  fvec x_in(XX, XX + size);
-  
-  SEXP out = Ralloc_Real(1);
-  REAL(out)[0] = quad_form(a_in, x_in, size);
-  
-  UNPROTECT(1);
-  return out;
-}
-
 extern "C" SEXP pi_primeR(SEXP yTx, SEXP xTx, SEXP beta, SEXP pi, SEXP sigma2, SEXP V){
   double *yTx_p, *xTx_p, *beta_p, pi_c, sigma2_c;
   int v = INTEGER(V)[0];
@@ -101,4 +85,16 @@ extern "C" SEXP compute_weightsR(SEXP yTx, SEXP xTx, SEXP beta, SEXP pi, SEXP G,
     REAL(out)[i] = arg0[i];
   UNPROTECT(1);
   return out;
+}
+
+extern "C" SEXP quad_formR(SEXP nin, SEXP xin, SEXP Ain){
+  int n = INTEGER(nin)[0];
+  double *A, *x;
+  A = NUMERIC_POINTER(Ain);
+  x = NUMERIC_POINTER(xin);
+  
+  SEXP result = PROTECT(allocVector(REALSXP, 1));
+  REAL(result)[0] = quad_form(n, x, A);
+  UNPROTECT(1);
+  return result;
 }

@@ -15,5 +15,6 @@
 #include "chain.h"
 #include "pi_prime.h"
 #include "compute_weights.h"
+#include "blas.h"
 
 #endif //INCLUDES_H
