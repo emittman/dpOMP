@@ -10,15 +10,13 @@ void compute_weights(fvec &weights, fvec &yTx, fvec &xTx, fvec &beta, fvec &pi, 
 #pragma omp parallel for
   for(int g=0; g<G; g++){
 
-    fvec yTx_g(&yTx[V*g], &yTx[V*g + V ]);
-    Rprintf("%lf\t%lf",yTx_g[0],yTx_g[1]);
-    
+    fvec yTx_g(&yTx[V*g], &yTx[V*g + V]);
+
     for(int k=0; k<K; k++) {
       fvec beta_k(&beta[V*k], &beta[V*k + V]);
       double pi_k = pi[k];
       weights[g*K + k] = pi_prime(yTx_g, xTx, beta_k, pi_k, 1.0, V);
     }
-    Rprintf("\n");
   }
 }
 
