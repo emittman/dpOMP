@@ -52,24 +52,26 @@ test_that("output is correct", {
   for(i in 1:num_tests)
     expect_equal(outputs[[i]], outputsR[[i]])
 })
-#   data2 <- list(
-#     yTx = c(1,1),
-#     xTx = diag(2),
-#     beta = c(1,-.2),
-#     pi = 1,
-#     G = 1,
-#     K = 1,
-#     n = 1,
-#     V = 2
-#   )
-#   out2 <- with(data1, compute_weights(yTx, xTx, beta, pi, G, K, n, V))
-#   pp <- with(data1, pi_prime(yTx, xTx, beta, pi, 1.0, V))
-  pi_primeR <- function(yTx, xTx, beta, pi, sigma2, V){
-    log(pi)  + - 1.0/(2.0*sigma2) * (t(beta)%*% xTx %*% beta - 2 * yTx %*% beta)
-  }
-  compute_weightsR <- function(yTx, xTx, beta, pi, sigma2, G, K, n, V){
-    g <- expand.grid(g=1:G, k=1:K)
-  }
-#   with(data2, pi_primeR(yTx, xTx, beta, pi, 1.0, V))
-#   with(data2, pi_prime(yTx, xTx, beta, pi, 1.0, V))
+
+##?delete
+# #   data2 <- list(
+# #     yTx = c(1,1),
+# #     xTx = diag(2),
+# #     beta = c(1,-.2),
+# #     pi = 1,
+# #     G = 1,
+# #     K = 1,
+# #     n = 1,
+# #     V = 2
+# #   )
+# #   out2 <- with(data1, compute_weights(yTx, xTx, beta, pi, G, K, n, V))
+# #   pp <- with(data1, pi_prime(yTx, xTx, beta, pi, 1.0, V))
+#   pi_primeR <- function(yTx, xTx, beta, pi, sigma2, V){
+#     log(pi)  + - 1.0/(2.0*sigma2) * (t(beta)%*% xTx %*% beta - 2 * yTx %*% beta)
+#   }
+#   compute_weightsR <- function(yTx, xTx, beta, pi, sigma2, G, K, n, V){
+#     g <- expand.grid(g=1:G, k=1:K)
+#   }
+# #   with(data2, pi_primeR(yTx, xTx, beta, pi, 1.0, V))
+# #   with(data2, pi_prime(yTx, xTx, beta, pi, 1.0, V))
 
