@@ -4,3 +4,5 @@
 dpOMP.Rproj
 Read-and-delete-me
 *~
+/src/*.o
+/src/*.dll
