@@ -55,7 +55,7 @@ extern "C" SEXP pi_primeR(SEXP yTx, SEXP xTx, SEXP beta, SEXP pi, SEXP sigma2, S
   sigma2_c = REAL(sigma2)[0];
   
   SEXP out = Ralloc_Real(1);
-  REAL(out)[0] = pi_prime(yTx_c.begin(), xTx_c, beta_c, pi_c, sigma2_c, v);
+  REAL(out)[0] = pi_prime(yTx_c.begin(), xTx_c, beta_c.begin(), pi_c, sigma2_c, v);
   
   UNPROTECT(1);
   return out;
