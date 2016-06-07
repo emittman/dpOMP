@@ -98,3 +98,49 @@ extern "C" SEXP quad_formR(SEXP nin, SEXP xin, SEXP Ain){
   UNPROTECT(1);
   return result;
 }
+
+extern "C" SEXP norm_exp_lpR(SEXP weights, SEXP K){
+  int KK = INTEGER(K)[0];
+  double *weight_ptr = NUMERIC_POINTER(weights);
+  fvec weights_c(weight_ptr, weight_ptr + KK);
+  norm_exp_lp(weights_c.begin(), KK);
+  SEXP result = PROTECT(allocVector(REALSXP, KK));
+  
+  for(int i=0; i<KK; i++){
+    REAL(result)[i] = weights_c[i];
+  }
+  UNPROTECT(1);
+  return result;
+}
+
+extern "C" SEXP rcategoricalR(SEXP weights, SEXP K){
+  int KK = INTEGER(K)[0];
+  double *weight_ptr = NUMERIC_POINTER(weights);
+  fvec weights_c(weight_ptr, weight_ptr + KK);
+  GetRNGstate();
+  unsigned int z = rcategorical(weights_c.begin(), KK);
+  PutRNGstate();
+  SEXP result = PROTECT(allocVector(INTSXP, 1));
+  
+  INTEGER(result)[0] = z;
+  
+  UNPROTECT(1);
+  return result;
+}
+
+extern "C" SEXP draw_zR(SEXP weights, SEXP G, SEXP K){
+  int GG = INTEGER(G)[0];
+  int KK = INTEGER(K)[0];
+  double *weight_ptr = NUMERIC_POINTER(weights);
+  fvec weights_c(weight_ptr, weight_ptr + GG*KK);
+  ivec z(GG);
+  GetRNGstate();
+  draw_z(weights_c, z, GG, KK);
+  PutRNGstate();
+  
+  SEXP result = PROTECT(allocVector(INTSXP, GG));
+  for(int i=0; i<GG; i++)
+    INTEGER(result)[i] = z[i];
+  UNPROTECT(1);
+  return result;
+}

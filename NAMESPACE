@@ -2,7 +2,10 @@
 
 export(compute_weights)
 export(dpgmm)
+export(draw_z)
 export(n_squares)
+export(norm_exp_lp)
 export(pi_prime)
 export(quad_form)
+export(rcategorical)
 useDynLib(dpOMP)
