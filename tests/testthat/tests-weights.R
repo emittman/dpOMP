@@ -1,5 +1,4 @@
 require(plyr)
-require(MCMCpack)
 context("weights")
 num_tests <- 10
 set.seed(621621)
@@ -12,7 +11,7 @@ data_sets <- llply(1:num_tests, function(i){
     yTx  = rnorm(G*V),
     xTx  = t(x)%*%x,
     beta = rnorm(K*V),
-    pi   = rdirichlet(1, rep(1,K)),
+    pi   = MCMCpack::rdirichlet(1, rep(1,K)),
     G    = G,
     K    = K,
     n    = 1,

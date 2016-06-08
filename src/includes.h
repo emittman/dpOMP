@@ -20,4 +20,5 @@
 #include "rcategorical.h"
 #include "draw_z.h"
 #include "cluster_stats.h"
+#include "transpose.h"
 #endif //INCLUDES_H

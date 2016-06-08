@@ -87,6 +87,8 @@ extern "C" SEXP compute_weightsR(SEXP yTx, SEXP xTx, SEXP beta, SEXP pi, SEXP G,
   return out;
 }
 
+
+//A is symmetric matrix, x is vector, compute xTAx
 extern "C" SEXP quad_formR(SEXP nin, SEXP xin, SEXP Ain){
   int n = INTEGER(nin)[0];
   double *A, *x;
@@ -145,21 +147,67 @@ extern "C" SEXP draw_zR(SEXP weights, SEXP G, SEXP K){
   return result;
 }
 
-extern "C" SEXP cluster_statsR(SEXP z, SEXP G, SEXP K){
+extern "C" SEXP cluster_statsR(SEXP z, SEXP yTx, SEXP G, SEXP K, SEXP V){
   int GG = INTEGER(G)[0];
   int KK = INTEGER(K)[0];
+  int VV = INTEGER(V)[0];
   int *z_ptr = INTEGER_POINTER(z);
+  double *yTx_ptr = NUMERIC_POINTER(yTx);
   
-  SEXP result = PROTECT(allocVector(INTSXP, KK));
+  SEXP result = PROTECT(allocVector(REALSXP, KK));
   uvec z_c(z_ptr, z_ptr + GG);
-  ivec Gk(KK);
+  fvec yTx_c(yTx_ptr, yTx_ptr + GG*VV);
+  fvec Gk(KK);
   
-  cluster_stats(z_c, Gk, GG, KK);
+  cluster_stats(z_c, yTx_c, Gk, GG, KK, VV);
   for(int i=0; i<KK; i++){
-    INTEGER(result)[i] = Gk[i];
+    REAL(result)[i] = Gk[i];
   }
   UNPROTECT(1);
   return result;
 }
   
+extern "C" SEXP transposeR(SEXP matin, SEXP M, SEXP N){
+    int MM = INTEGER(M)[0];
+    int NN = INTEGER(N)[0];
+    double *in_ptr = NUMERIC_POINTER(matin);
+    
+    SEXP result = PROTECT(allocVector(REALSXP, MM*NN));
+    double *out_ptr = NUMERIC_POINTER(result);
+    transpose(in_ptr, out_ptr, MM, NN);
+    
+    UNPROTECT(1);
+    return result;
+}
+
+extern "C" SEXP dposvR(SEXP n, SEXP A, SEXP B){
+  int N = INTEGER(n)[0];
+  int info;
+  double *AA = NUMERIC_POINTER(A);
+  double *BB = NUMERIC_POINTER(B);
   
+  SEXP out  = Ralloc_List(3);
+  SEXP chol = Ralloc_Real(N*N);
+  SEXP sol  = Ralloc_Real(N);
+  SEXP status = PROTECT(allocVector(INTSXP, 1));
+  
+  info = dposv(N, AA, BB);
+  if(info == 0){
+    info = dpotri(N, AA);
+  }
+  
+  INTEGER(status)[0] = info;
+  
+  for(int i=0; i<N; i++)
+    REAL(sol)[i] = BB[i];
+  
+  for(int j=0; j<N*N; j++)
+    REAL(chol)[j] = AA[j];
+  
+  SET_VECTOR_ELT(out, 0, chol);
+  SET_VECTOR_ELT(out, 1, sol);
+  SET_VECTOR_ELT(out, 2, status);
+  
+  UNPROTECT(4);
+  return out;
+}

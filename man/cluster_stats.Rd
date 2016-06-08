@@ -4,7 +4,7 @@
 \alias{cluster_stats}
 \title{Compute summary stats for groups}
 \usage{
-cluster_stats(z, K)
+cluster_stats(z, yTx, K, V)
 }
 \arguments{
 \item{z}{group indicators}
