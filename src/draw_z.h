@@ -6,7 +6,7 @@
   * Advice on subsetting from http://stackoverflow.com/questions/421573/best-way-to-extract-a-subvector-from-a-vector
   */
 
-void draw_z(fvec &weights, ivec &z, int G, int K){
+void draw_z(fvec &weights, uvec &z, int G, int K){
 #pragma omp parallel for
   for(int g=0; g<G; g++){
     

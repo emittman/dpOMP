@@ -133,7 +133,7 @@ extern "C" SEXP draw_zR(SEXP weights, SEXP G, SEXP K){
   int KK = INTEGER(K)[0];
   double *weight_ptr = NUMERIC_POINTER(weights);
   fvec weights_c(weight_ptr, weight_ptr + GG*KK);
-  ivec z(GG);
+  uvec z(GG);
   GetRNGstate();
   draw_z(weights_c, z, GG, KK);
   PutRNGstate();
@@ -144,3 +144,22 @@ extern "C" SEXP draw_zR(SEXP weights, SEXP G, SEXP K){
   UNPROTECT(1);
   return result;
 }
+
+extern "C" SEXP cluster_statsR(SEXP z, SEXP G, SEXP K){
+  int GG = INTEGER(G)[0];
+  int KK = INTEGER(K)[0];
+  int *z_ptr = INTEGER_POINTER(z);
+  
+  SEXP result = PROTECT(allocVector(INTSXP, KK));
+  uvec z_c(z_ptr, z_ptr + GG);
+  ivec Gk(KK);
+  
+  cluster_stats(z_c, Gk, GG, KK);
+  for(int i=0; i<KK; i++){
+    INTEGER(result)[i] = Gk[i];
+  }
+  UNPROTECT(1);
+  return result;
+}
+  
+  
