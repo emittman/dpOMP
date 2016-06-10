@@ -1,19 +1,30 @@
 context("solve linear equations")
 
-X <- matrix(rnorm(100), 20, 5)
-XX <- t(X)%*%X
-beta <- rnorm(5, 10, 2)
-y <- rnorm(X%*%beta)
-Xty <- t(X)%*%y
-out <- dposv(5, XX, Xty)
-L <- matrix(out[[1]], 5, 5)
+set.seed(61016)
+V <- 2
+X <- matrix(c(1,1,1,-1),V,V)
+G <- 10
+n <- 3
+K <- 5
+d <- generate_data(X, n, G, K)
 
+k <- unique(d$z)[1]
+
+stats <- with(d, cluster_stats(k, yTx, xTx, G, 2, n, z))
+
+YTX <- with(d, colSums(yTx[z==k,]))
+
+V <- solve(d$xTx * stats[[1]] * n + diag(V))
+
+bhat <- V %*% YTX
+
+L <- chol(V)
 
 test_that("estimate is correct", {
-  expect_equal(out[[2]], drop(solve(XX)%*%Xty))
+  expect_equal(stats[[2]], drop(bhat))
 })
 
 test_that("inverse is correct", {
-  indic <- lower.tri(L)
-  expect_equal(indic*L, indic*solve(XX))
+  indic <- lower.tri(L, diag = T)
+  expect_equal(indic*stats[[3]], L)
 })

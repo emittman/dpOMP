@@ -87,6 +87,15 @@ extern "C" SEXP compute_weightsR(SEXP yTx, SEXP xTx, SEXP beta, SEXP pi, SEXP G,
   return out;
 }
 
+extern "C" SEXP ddotR(SEXP n, SEXP x, SEXP y){
+  int N = INTEGER(n)[0];
+  double *X = NUMERIC_POINTER(x), *Y = NUMERIC_POINTER(y);
+  SEXP result = Ralloc_Real(1);
+  REAL(result)[0] = ddot(N, X, Y);
+  UNPROTECT(1);
+  return result;
+}
+
 
 //A is symmetric matrix, x is vector, compute xTAx
 extern "C" SEXP quad_formR(SEXP nin, SEXP xin, SEXP Ain){
@@ -147,23 +156,50 @@ extern "C" SEXP draw_zR(SEXP weights, SEXP G, SEXP K){
   return result;
 }
 
-extern "C" SEXP cluster_statsR(SEXP z, SEXP yTx, SEXP G, SEXP K, SEXP V){
+  
+extern "C" SEXP cluster_statsR(SEXP k, SEXP yTx, SEXP xTx, SEXP G, SEXP V, SEXP n, SEXP z){
+  int kk = INTEGER(k)[0];
   int GG = INTEGER(G)[0];
-  int KK = INTEGER(K)[0];
   int VV = INTEGER(V)[0];
+  int nn = INTEGER(n)[0];
   int *z_ptr = INTEGER_POINTER(z);
   double *yTx_ptr = NUMERIC_POINTER(yTx);
-  
-  SEXP result = PROTECT(allocVector(REALSXP, KK));
-  uvec z_c(z_ptr, z_ptr + GG);
+  double *xTx_ptr = NUMERIC_POINTER(xTx);
+
+  fvec xTx_c(xTx_ptr, xTx_ptr + VV*VV);  
   fvec yTx_c(yTx_ptr, yTx_ptr + GG*VV);
-  fvec Gk(KK);
+  uvec z_c(z_ptr, z_ptr + GG);
+  fvec Gkk(1);
+  fvec beta_hat(VV);
+  fvec chol_S(VV*VV);
+  fvec IGscale(1);
+  cluster_stats(kk, yTx_c, xTx_c, GG, VV, nn, z_c, Gkk.begin(), beta_hat, chol_S, IGscale.begin());
+  Rprintf("%d", z_c[0]);
   
-  cluster_stats(z_c, yTx_c, Gk, GG, KK, VV);
-  for(int i=0; i<KK; i++){
-    REAL(result)[i] = Gk[i];
+  SEXP result = Ralloc_List(4);
+  SEXP GkR = Ralloc_Real(1);
+  SEXP beta_hatR = Ralloc_Real(VV);
+  SEXP chol_SR = Ralloc_Real(VV*VV);
+  SEXP IGscaleR = Ralloc_Real(1);
+  
+  REAL(GkR)[0] = Gkk[0];
+  
+  for(int i=0; i<VV; i++){
+    REAL(beta_hatR)[i] = beta_hat[i];
   }
-  UNPROTECT(1);
+  for(int i=0; i<VV*VV; i++){
+    REAL(chol_SR)[i] = chol_S[i];
+  }
+  
+  REAL(IGscaleR)[0] = IGscale[0];
+  
+  SET_VECTOR_ELT(result, 0, GkR);
+  SET_VECTOR_ELT(result, 1, beta_hatR);
+  SET_VECTOR_ELT(result, 2, chol_SR);
+  SET_VECTOR_ELT(result, 3, IGscaleR);
+  
+  
+  UNPROTECT(5);
   return result;
 }
   
@@ -180,7 +216,7 @@ extern "C" SEXP transposeR(SEXP matin, SEXP M, SEXP N){
     return result;
 }
 
-extern "C" SEXP dposvR(SEXP n, SEXP A, SEXP B){
+extern "C" SEXP solve_normaleq_symm_matR(SEXP n, SEXP A, SEXP B){
   int N = INTEGER(n)[0];
   int info;
   double *AA = NUMERIC_POINTER(A);
@@ -191,7 +227,7 @@ extern "C" SEXP dposvR(SEXP n, SEXP A, SEXP B){
   SEXP sol  = Ralloc_Real(N);
   SEXP status = PROTECT(allocVector(INTSXP, 1));
   
-  info = dposv(N, AA, BB);
+  info = solve_normaleq_symm_mat(N, AA, BB);
   if(info == 0){
     info = dpotri(N, AA);
   }
@@ -211,3 +247,18 @@ extern "C" SEXP dposvR(SEXP n, SEXP A, SEXP B){
   UNPROTECT(4);
   return out;
 }
+
+extern "C" SEXP get_k_indicesR(SEXP z, SEXP G, SEXP k){
+  int kk = INTEGER(k)[0];
+  int GG = INTEGER(G)[0];
+  int *z_ptr = INTEGER_POINTER(z);
+  uvec z_c(z_ptr, z_ptr+GG);
+  fvec indicC(GG);
+  get_k_indices(z_c, indicC, kk);
+  
+  SEXP result = Ralloc_Real(GG);
+  for(int i=0; i<GG; i++) REAL(result)[i] = indicC[i];
+  UNPROTECT(1);
+  return result;
+}
+

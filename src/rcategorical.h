@@ -3,6 +3,7 @@
 
 #include <numeric> //accumulate
 #include <algorithm> //transform
+#include <functional>
 #include <Rmath.h> //r_unif()
 // #include <random> //discrete distribution
 
