@@ -1,6 +1,7 @@
 #ifndef COMPUTE_WEIGHTS_H
 #define COMPUTE_WEIGHTS_H
 
+#include "pi_prime.h"
 /*
  * Compute the weights required for sampling Z.
  * Advice on subsetting from http://stackoverflow.com/questions/421573/best-way-to-extract-a-subvector-from-a-vector

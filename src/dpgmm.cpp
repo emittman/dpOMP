@@ -222,23 +222,26 @@ extern "C" SEXP solve_normaleq_symm_matR(SEXP n, SEXP A, SEXP B){
   double *AA = NUMERIC_POINTER(A);
   double *BB = NUMERIC_POINTER(B);
   
+  fvec a(AA, AA + N*N);
+  fvec b(BB, BB + N);
+  
   SEXP out  = Ralloc_List(3);
   SEXP chol = Ralloc_Real(N*N);
   SEXP sol  = Ralloc_Real(N);
   SEXP status = PROTECT(allocVector(INTSXP, 1));
   
-  info = solve_normaleq_symm_mat(N, AA, BB);
+  info = solve_normaleq_symm_mat(N, &(a[0]), &(b[0]));
   if(info == 0){
-    info = dpotri(N, AA);
+    info = dpotri(N, &(a[0]));
   }
   
   INTEGER(status)[0] = info;
   
   for(int i=0; i<N; i++)
-    REAL(sol)[i] = BB[i];
+    REAL(sol)[i] = b[i];
   
   for(int j=0; j<N*N; j++)
-    REAL(chol)[j] = AA[j];
+    REAL(chol)[j] = a[j];
   
   SET_VECTOR_ELT(out, 0, chol);
   SET_VECTOR_ELT(out, 1, sol);
@@ -262,3 +265,13 @@ extern "C" SEXP get_k_indicesR(SEXP z, SEXP G, SEXP k){
   return result;
 }
 
+extern "C" SEXP rinvgammaR(SEXP n, SEXP shape, SEXP scale){
+  int N = INTEGER(n)[0];
+  double Sh = REAL(shape)[0];
+  double Sc = REAL(scale)[0];
+  SEXP result = Ralloc_Real(N);
+  for(int i=0; i<N; i++)
+    REAL(result)[i] = rinvgamma(Sh, Sc);
+  UNPROTECT(1);
+  return result;
+}

@@ -1,8 +1,8 @@
 #' BLAS implemented daxpy routine
 #' 
 #' 
-daxpy <- function(alpha, x, y){
-  .Call("daxpyR",
+linear_comb_vec <- function(alpha, x, y){
+  .Call("linear_comb_vecR",
         as.integer(length(x)),
         as.numeric(alpha),
         as.numeric(x),

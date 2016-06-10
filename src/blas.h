@@ -5,7 +5,7 @@
 // extern void daxpy(int*, double*, double*, int*, double*, int*); 
 extern "C"{
   double ddot_(int *n, double *x, int *incx, double *y, int *incy);
-  void daxpy_(int *n, double *alpha, double *x, int *incx, double *y, int *incy);
+  void daxpy_(int *n, double *alpha, const double *x, int *incx, double *y, int *incy);
   void dsymv_(char *uplo, int *n, double *alpha, double *A, int *lda, double *x,
             int *incx, double *beta, double *y, int *incy);
   void dgemv_(char *trans, int *m, int *n, double *alpha, const double *A, int *lda, const double *x,
@@ -17,10 +17,10 @@ extern "C"{
   void dtrmv_(char *uplo, char *trans, char *diag, int *N, const double *A, int *lda, double *x, int *incx);
 }
 
-void multiply_lowertri_vec(int n, const double *L, double *x){
+void multiply_lowertri_vec(int n, const fvec &L, fvec &x){
   char uplo[] = "L", trans[] = "N", diag[] = "N";
   int lda = n, incx = 1;
-  dtrmv_(uplo, trans, diag, &n, L, &lda, x, &incx);
+  dtrmv_(uplo, trans, diag, &n, &(L[0]), &lda, &(x[0]), &incx);
 }
 
 int solve_normaleq_symm_mat(int n, double *A, double *B){
@@ -59,10 +59,10 @@ double ddot(int n, double *x, double *y){
   return out;
 }
 
-void daxpy(int n, double alpha, double *x, double *y){
+void linear_comb_vec(int n, double alpha, const fvec &x, fvec &y){
   /* y <- alpha * x + y; scalars{alpha}, vectors{x, y}*/
   int incx=1, incy=1;
-  daxpy_(&n, &alpha, x, &incx, y, &incy);
+  daxpy_(&n, &alpha, &(x[0]), &incx, &(y[0]), &incy);
 }
 
 void dsymv(int n, double alpha, double *A, double *x, double beta, double *y){

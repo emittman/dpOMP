@@ -21,4 +21,5 @@
 #include "draw_z.h"
 #include "cluster_stats.h"
 #include "transpose.h"
+#include "sample_wrappers.h"
 #endif //INCLUDES_H

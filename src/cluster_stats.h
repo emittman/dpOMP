@@ -32,7 +32,7 @@ void increment_IGscale(fveci IGscale, const fvec &chol_Sinv, fvec beta_hat){
   //multiply beta_hat by cholesky factor
   //increment IGscale by product * 1/2
   int n = beta_hat.size();
-  multiply_lowertri_vec(n, &(chol_Sinv[0]), &(beta_hat[0]));
+  multiply_lowertri_vec(n, chol_Sinv, beta_hat);
   *IGscale = ddot(n, &(beta_hat[0]), &(beta_hat[0]));
 }
 
