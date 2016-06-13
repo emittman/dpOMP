@@ -22,4 +22,5 @@
 #include "cluster_stats.h"
 #include "transpose.h"
 #include "sample_wrappers.h"
+#include "draw_pi.h"
 #endif //INCLUDES_H

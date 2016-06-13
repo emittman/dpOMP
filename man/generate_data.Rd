@@ -4,7 +4,7 @@
 \alias{generate_data}
 \title{generates a data set from the model}
 \usage{
-generate_data(X, n, G, K, beta = NULL)
+generate_data(X, N, G, K, beta = NULL, pi = NULL)
 }
 \description{
 generates a data set from the model

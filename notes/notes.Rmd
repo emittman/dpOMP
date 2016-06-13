@@ -1,0 +1,23 @@
+# C++ level inputs:
+(Note: all vectors/arrays are column major)
+
+* (double*) $X^\top y$: contiguous by gene
+* (double*) $X^\top X$
+* (int) G
+* (int) V
+* (int) N
+* (int) K
+
+# Sampling of $Z$
+
+###Updating $\pi_k \rightarrow \pi_{gk}'$
+
+* Given data $Y_g, \beta, \sigma^2$: $\pi_{gk}' \propto \pi_k N(y_g; X\beta_k, \sigma^2)$
+
+###Categorical draw
+
+* Cumulative sum of $(\pi_{gk}')_{k=1, ..., K} = w
+* $U_g \stackrel{ind}{\sim} \operatorname{U}(0, w[K])$
+* $Z_g = \sum_{j=1}^{K} \operatorname{I}(u_g > w[j])$
+
+# Sampling of $\pi_k$

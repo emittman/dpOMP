@@ -4,8 +4,9 @@
 #include <Rmath.h>
 #include "blas.h"
 #include "cluster_stats.h"
+#include "sample_wrappers.h"
 
-void draw_theta(fvec &beta, double sigma2, uvec &z, fvec &yTx, fvec &xTx, fvec &Gk, int G, int K, int V, int n){
+void draw_theta(fvec &beta, double *sigma2, uvec &z, double *yTy, fvec &yTx, fvec &xTx, fvec &Gk, int G, int K, int V, int n){
   fvec IGscale(K);
   //private k?  
   #pragma omp parallel for
@@ -19,13 +20,13 @@ void draw_theta(fvec &beta, double sigma2, uvec &z, fvec &yTx, fvec &xTx, fvec &
       beta_raw[v] = rnorm(0, 1); //draw beta_raw
     
     multiply_lowertri_vec(V, chol_S, beta_raw);
-    linear_comb_vec(V, sqrt(sigma2), beta_raw, beta_hat);
+    linear_comb_vec(V, sqrt(*sigma2), beta_raw, beta_hat);
     
     for(int v=0; v<V; v++)
       beta_k_iter[v] = beta_hat[v];
   }
   double scale = std::accumulate(IGscale.begin(), IGscale.end(), 0.0);
-  //sigma2 = 1.0 / rgamma(G*V*n/2, 2/scale);
+  *sigma2 = rinvgamma(G*V*n/2, (*yTy + scale)/2);
 }
 
 #endif

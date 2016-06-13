@@ -41,7 +41,7 @@ double get_cluster_size(fvec &indices){
   return result;
 }
 
-void cluster_stats(int k, fvec &yTx, const fvec &xTx, int G, int V, int n,
+void cluster_stats(int k, fvec &xTy, const fvec &xTx, int G, int V, int n,
                    const uvec &z, fveci Gkk,
                    fvec &beta_hat, fvec &chol_S, fveci IGscale){
     fvec indic(G);
@@ -55,7 +55,7 @@ void cluster_stats(int k, fvec &yTx, const fvec &xTx, int G, int V, int n,
 //     Rprintf("indices:\n");
 //     print_fmat(indic, 1, G);
     
-    multiply_mat_vec(G, V, yTx, indic, beta_hat, 1); // sum yTx for g: z_g==k, last arg means trans = "T"
+    multiply_mat_vec(G, V, xTy, indic, beta_hat, 0); // sum xTy for g: z_g==k, last arg means trans = "F"
 //     Rprintf("yTx:\n");
 //     print_fmat(beta_hat, 1, V);
     

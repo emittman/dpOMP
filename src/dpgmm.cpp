@@ -270,8 +270,38 @@ extern "C" SEXP rinvgammaR(SEXP n, SEXP shape, SEXP scale){
   double Sh = REAL(shape)[0];
   double Sc = REAL(scale)[0];
   SEXP result = Ralloc_Real(N);
+  GetRNGstate();
   for(int i=0; i<N; i++)
     REAL(result)[i] = rinvgamma(Sh, Sc);
+  PutRNGstate();
   UNPROTECT(1);
   return result;
+}
+
+extern "C" SEXP tail_sums(SEXP counts, SEXP len){
+  int K = INTEGER(len)[0];
+  double *Counts = NUMERIC_POINTER(counts);
+  fvec C(Counts, Counts + K);
+  fvec Tail(K);
+  get_tail_sums(C, Tail);
+  SEXP result = Ralloc_Real(K);
+  for(int i=0; i<K; i++)
+    REAL(result)[i] = Tail[i];
+  UNPROTECT(1);
+  return result;
+}
+
+extern "C" SEXP draw_piR(SEXP GK, SEXP K){
+  int KK = INTEGER(K)[0];
+  double *Gk_ptr = NUMERIC_POINTER(GK);
+  fvec Gk(Gk_ptr, Gk_ptr + KK);
+  fvec pi(KK);
+  GetRNGstate();
+  draw_pi(pi, Gk, KK, 1.0);
+  PutRNGstate();
+  SEXP out = Ralloc_Real(KK);
+  for(int i=0; i<KK; i++)
+    REAL(out)[i] = pi[i];
+  UNPROTECT(1);
+  return out;
 }

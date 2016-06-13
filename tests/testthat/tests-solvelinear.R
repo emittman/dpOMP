@@ -8,7 +8,7 @@ n <- 3
 K <- 5
 d <- generate_data(X, n, G, K)
 
-k <- unique(d$z)[1]
+k <- as.numeric(names(which.max(table(d$z))))
 
 stats <- with(d, cluster_stats(k, yTx, xTx, G, 2, n, z))
 

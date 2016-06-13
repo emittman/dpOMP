@@ -1,3 +1,6 @@
+#ifndef DEBUG_PRINT_H
+#define DEBUG_PRINT_H
+
 #include<R.h>
 #include "types.h"
 
@@ -9,3 +12,5 @@ void print_fmat(fvec &m, int M, int N){
   }
   Rprintf("\n");
 }
+
+#endif
