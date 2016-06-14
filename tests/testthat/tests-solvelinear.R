@@ -10,13 +10,15 @@ d <- generate_data(X, n, G, K)
 
 k <- as.numeric(names(which.max(table(d$z))))
 
-stats <- with(d, cluster_stats(k, yTx, xTx, G, 2, n, z))
+stats <- with(d, cluster_stats(k, xTy, xTx, G, 2, n, z))
 
-YTX <- with(d, colSums(yTx[z==k,]))
+XTY <- with(d, rowSums(xTy[,z==k]))
 
-V <- solve(d$xTx * stats[[1]] * n + diag(V))
+Vinv <- d$xTx * stats[[1]] * n + diag(V)
 
-bhat <- V %*% YTX
+V <- solve(Vinv)
+
+bhat <- V %*% XTY
 
 L <- chol(V)
 
@@ -27,4 +29,8 @@ test_that("estimate is correct", {
 test_that("inverse is correct", {
   indic <- lower.tri(L, diag = T)
   expect_equal(indic*stats[[3]], L)
+})
+
+test_that("IG scale is correct", {
+  expect_equal(stats[[4]], drop(t(bhat)%*%Vinv%*%bhat))
 })

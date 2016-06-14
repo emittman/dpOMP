@@ -4,10 +4,10 @@
 #' @param K max number of groups
 #' 
 #' @export
-cluster_stats <- function(k, yTx, xTx, G, V, n, z){
+cluster_stats <- function(k, xTy, xTx, G, V, n, z){
   .Call("cluster_statsR",
         as.integer(k),
-        as.numeric(yTx),
+        as.numeric(xTy),
         as.numeric(xTx),
         as.integer(G),
         as.integer(V),

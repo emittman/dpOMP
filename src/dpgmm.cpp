@@ -157,23 +157,23 @@ extern "C" SEXP draw_zR(SEXP weights, SEXP G, SEXP K){
 }
 
   
-extern "C" SEXP cluster_statsR(SEXP k, SEXP yTx, SEXP xTx, SEXP G, SEXP V, SEXP n, SEXP z){
+extern "C" SEXP cluster_statsR(SEXP k, SEXP xTy, SEXP xTx, SEXP G, SEXP V, SEXP n, SEXP z){
   int kk = INTEGER(k)[0];
   int GG = INTEGER(G)[0];
   int VV = INTEGER(V)[0];
   int nn = INTEGER(n)[0];
   int *z_ptr = INTEGER_POINTER(z);
-  double *yTx_ptr = NUMERIC_POINTER(yTx);
+  double *xTy_ptr = NUMERIC_POINTER(xTy);
   double *xTx_ptr = NUMERIC_POINTER(xTx);
 
   fvec xTx_c(xTx_ptr, xTx_ptr + VV*VV);  
-  fvec yTx_c(yTx_ptr, yTx_ptr + GG*VV);
+  fvec xTy_c(xTy_ptr, xTy_ptr + GG*VV);
   uvec z_c(z_ptr, z_ptr + GG);
   fvec Gkk(1);
   fvec beta_hat(VV);
   fvec chol_S(VV*VV);
   fvec IGscale(1);
-  cluster_stats(kk, yTx_c, xTx_c, GG, VV, nn, z_c, Gkk.begin(), beta_hat, chol_S, IGscale.begin());
+  cluster_stats(kk, xTy_c, xTx_c, GG, VV, nn, z_c, Gkk.begin(), beta_hat, chol_S, IGscale.begin());
   Rprintf("%d", z_c[0]);
   
   SEXP result = Ralloc_List(4);
