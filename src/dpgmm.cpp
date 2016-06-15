@@ -3,36 +3,45 @@
 #define Ralloc_Real(len)  PROTECT(allocVector(REALSXP, (len)))
 #define Ralloc_List(len)  PROTECT(allocVector(VECSXP, (len)))
 
-extern "C" SEXP dpgmmR(SEXP data, SEXP design, SEXP G, SEXP K, SEXP N, SEXP V){
-  int GG, KK, NN, VV, data_len, design_len, beta_len;
+extern "C" SEXP dpgmmR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP G, SEXP K, SEXP N, SEXP V){
+  int GG, KK, NN, VV, xTy_len, xTx_len, beta_len;
   GG = INTEGER(G)[0];
   KK = INTEGER(K)[0];
   NN = INTEGER(N)[0];
   VV = INTEGER(V)[0];
   
-  data_len = GG*NN*VV;
-  design_len = VV*VV;
+  xTy_len = GG*VV;
+  xTx_len = VV*VV;
   beta_len = KK*VV;
 
-  double *data_p, *design_p;
-  data_p = NUMERIC_POINTER(data);
-  design_p = NUMERIC_POINTER(design);
+  double yTy, *xTy_p, *xTx_p;
+  yTy = REAL(yTyR)[0];
+  xTy_p = NUMERIC_POINTER(xTyR);
+  xTx_p = NUMERIC_POINTER(xTxR);
   
-  fvec data_in(data_p, data_p + data_len);
-  fvec design_in(design_p, design_p + design_len);
+  fvec xTy(xTy_p, xTy_p + xTy_len);
+  fvec xTx(xTx_p, xTx_p + xTx_len);
   
-  fvec beta_h(KK*VV);
-  fvec pi_h(KK);
+  fvec beta(KK*VV);
+  fvec pi(KK);
+  uvec z(GG);
+  fvec weights(GG*KK);
+  fvec Gk(KK);
+  double sigma2 = 1;
   
   SEXP beta_out = Ralloc_Real(beta_len);
   SEXP pi_out = Ralloc_Real(KK);
   SEXP list_out = Ralloc_List(2);
   
+  draw_z(weights, z, GG, KK);
+  draw_theta(beta, &sigma2, z, &yTy, xTy, xTx, Gk, GG, KK, VV, NN);
+  draw_pi(pi, Gk, KK, 1.0);
+  
   for(int i=0; i<beta_len; i++)
-    REAL(beta_out)[i] = beta_h[i];
+    REAL(beta_out)[i] = beta[i];
   
   for(int i=0; i<KK; i++)
-    REAL(pi_out)[i] = pi_h[i];
+    REAL(pi_out)[i] = pi[i];
   
   SET_VECTOR_ELT(list_out, 0, beta_out);
   SET_VECTOR_ELT(list_out, 1, pi_out);

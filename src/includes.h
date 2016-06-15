@@ -19,6 +19,7 @@
 #include "blas.h"
 #include "rcategorical.h"
 #include "draw_z.h"
+#include "draw_theta.h"
 #include "cluster_stats.h"
 #include "transpose.h"
 #include "sample_wrappers.h"

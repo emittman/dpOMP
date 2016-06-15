@@ -16,8 +16,8 @@
 
 ###Categorical draw
 
-* Cumulative sum of $(\pi_{gk}')_{k=1, ..., K} = w
-* $U_g \stackrel{ind}{\sim} \operatorname{U}(0, w[K])$
-* $Z_g = \sum_{j=1}^{K} \operatorname{I}(u_g > w[j])$
+* Cumulative sum of $(\pi_{gk}')_{k=1, ..., K} = w$
+* $U_g \stackrel{ind}{\sim} \operatorname{U}(0, w_K)$
+* $Z_g = \sum_{j=1}^{K} \operatorname{I}(u_g > w_j)$
 
 # Sampling of $\pi_k$
