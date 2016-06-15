@@ -1,10 +1,13 @@
 Package: dpOMP
 Type: Package
 Title: Uses OpenMP for stuff
-Version: 1.0
+Version: 0.1
 Date: 2016-05-26
-Author: Who wrote it
-Maintainer: Who to complain to <yourfault@somewhere.net>
+Author: Eric Mittman
+Maintainer: Eric Mittman <emittman@iastate.edu>
 Description: More about what it does (maybe more than one line)
 License: What license is it under?
 RoxygenNote: 5.0.1
+Suggests:
+    MCMCpack
+    
