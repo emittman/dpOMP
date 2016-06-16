@@ -15,18 +15,27 @@ void draw_theta(fvec &beta, double *sigma2, uvec &z, double *yTy, fvec &xTy, fve
     fvec chol_S(V*V);
     fvec beta_raw(V);
     cluster_stats(k, xTy, xTx, G, V, n, z, Gk.begin() + k, beta_hat, chol_S, IGscale.begin() + k);
-    fveci beta_k_iter = beta.begin() + V*k;
     for(int v=0; v<V; v++)
       beta_raw[v] = rnorm(0, 1); //draw beta_raw
     
+    Rprintf("\nbeta raw:\n");
+    print_fmat(beta_raw, 1, V);
+    
     multiply_lowertri_vec(V, chol_S, beta_raw);
+    Rprintf("\nbeta raw (scaled):\n");
+    print_fmat(beta_raw, 1, V);
+   
     linear_comb_vec(V, sqrt(*sigma2), beta_raw, beta_hat);
+    Rprintf("\nbeta draw:\n");
+    print_fmat(beta_hat, 1, V);
+    
     
     for(int v=0; v<V; v++)
-      beta_k_iter[v] = beta_hat[v];
+      beta[k*V + v] = beta_hat[v];
   }
   double scale = std::accumulate(IGscale.begin(), IGscale.end(), 0.0);
   *sigma2 = rinvgamma(G*V*n/2, (*yTy + scale)/2);
+  Rprintf("IG scale = %lf\n",scale);
 }
 
 #endif

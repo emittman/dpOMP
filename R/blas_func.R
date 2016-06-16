@@ -1,6 +1,6 @@
 #' BLAS implemented daxpy routine
 #' 
-#' 
+#' @export
 linear_comb_vec <- function(alpha, x, y){
   .Call("linear_comb_vecR",
         as.integer(length(x)),

@@ -60,17 +60,17 @@ void cluster_stats(int k, fvec &xTy, const fvec &xTx, int G, int V, int n,
     print_fmat(beta_hat, 1, V);
     
     construct_precision_mat(xTx, chol_S, *Gkk, 1.0, V, n); // S_inv = (X^T * X + lambda * I)
-    Rprintf("chol_prec:\n");
+    Rprintf("prec:\n");
     print_fmat(chol_S, V, V);
       
     
     solve_normaleq_symm_mat(V, &(chol_S[0]), &(beta_hat[0])); // solve normal equation X^Ty = S_inv * beta_hat, convert S_inv to cholesky factor
-//     Rprintf("betahat:\n");
-//     print_fmat(beta_hat, 1, V);
+    Rprintf("betahat:\n");
+    print_fmat(beta_hat, 1, V);
     
     increment_IGscale(IGscale, chol_S, beta_hat);
-//     Rprintf("IG:\n");
-//     Rprintf("%lf\n",*IGscale);
+    Rprintf("IG:\n");
+    Rprintf("%lf\n",*IGscale);
     invert_lower_tri(V, &(chol_S[0])); // invert S_inv 
   
 }

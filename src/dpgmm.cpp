@@ -314,3 +314,54 @@ extern "C" SEXP draw_piR(SEXP GK, SEXP K){
   UNPROTECT(1);
   return out;
 }
+
+extern "C" SEXP draw_thetaR(SEXP z, SEXP yTy, SEXP xTy, SEXP xTx, SEXP G, SEXP K, SEXP V, SEXP N){
+  int GG, KK, VV, NN;
+  GG = INTEGER(G)[0];
+  KK = INTEGER(K)[0];
+  VV = INTEGER(V)[0];
+  NN = INTEGER(N)[0];
+  int *z_p = INTEGER_POINTER(z);
+  double yTyC = REAL(yTy)[0];
+  double *xTy_p = NUMERIC_POINTER(xTy);
+  double *xTx_p = NUMERIC_POINTER(xTx);
+  uvec zC(z_p, z_p + GG);
+  fvec xTyC(xTy_p, xTy_p + GG*VV);
+  fvec xTxC(xTx_p, xTx_p + VV*VV);
+  
+  fvec betaC(KK*VV);
+  double sigma2C = 1;
+  fvec Gk(KK);
+  
+  GetRNGstate();
+  draw_theta(betaC, &sigma2C, zC, &yTyC, xTyC, xTxC, Gk, GG, KK, VV, NN);
+  PutRNGstate();
+  
+  SEXP out = Ralloc_List(2);
+  SEXP beta = Ralloc_Real(KK*VV);
+  SEXP sigma2 = Ralloc_Real(1);
+  
+  for(int i=0; i<(KK*VV); i++)
+    REAL(beta)[i] = betaC[i];
+  REAL(sigma2)[0] = sigma2C;
+  
+  SET_VECTOR_ELT(out, 0, beta);
+  SET_VECTOR_ELT(out, 1, sigma2);
+  UNPROTECT(3);
+  return out;
+}
+
+extern "C" SEXP linear_comb_vecR(SEXP n, SEXP alpha, SEXP x, SEXP y){
+  int N = INTEGER(n)[0];
+  double a = REAL(alpha)[0];
+  double *X = NUMERIC_POINTER(x);
+  double *Y = NUMERIC_POINTER(y);
+  fvec xC(X, X + N);
+  fvec yC(Y, Y + N);
+  linear_comb_vec(N, a, xC, yC);
+  SEXP yout = Ralloc_Real(N);
+  for(int i=0; i<N; i++)
+    REAL(yout)[i] = yC[i];
+  UNPROTECT(1);
+  return yout;
+}
