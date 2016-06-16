@@ -4,7 +4,7 @@
 \alias{dpgmm}
 \title{Do MCMC for dpgmm model}
 \usage{
-dpgmm(data, design, G, K, V, N)
+dpgmm(data, design, G, V, K, N, iter)
 }
 \arguments{
 \item{data}{A column-major $\eqn{G \cdot VN}$ gene expressionvector/matrix}
@@ -13,9 +13,9 @@ dpgmm(data, design, G, K, V, N)
 
 \item{G}{number of genes}
 
-\item{K}{maximum number of clusters}
-
 \item{V}{number of varieties/groups}
+
+\item{K}{maximum number of clusters}
 
 \item{N}{samples per variety/group}
 }

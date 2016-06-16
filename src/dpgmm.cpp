@@ -3,13 +3,17 @@
 #define Ralloc_Real(len)  PROTECT(allocVector(REALSXP, (len)))
 #define Ralloc_List(len)  PROTECT(allocVector(VECSXP, (len)))
 
-extern "C" SEXP dpgmmR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP G, SEXP K, SEXP N, SEXP V){
-  int GG, KK, NN, VV, xTy_len, xTx_len, beta_len;
+extern "C" SEXP dpgmmR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP G, SEXP V, SEXP K, SEXP N, SEXP iter){
+  int GG, KK, NN, VV, xTy_len, xTx_len, beta_len, I;
   GG = INTEGER(G)[0];
   KK = INTEGER(K)[0];
   NN = INTEGER(N)[0];
   VV = INTEGER(V)[0];
-  
+  I = INTEGER(iter)[0];
+  Rprintf("GG = %d\n",GG);
+  Rprintf("VV =  %d\n",VV);
+  Rprintf("KK = %d\n", KK);
+  Rprintf("NN = %d\n",NN);
   xTy_len = GG*VV;
   xTx_len = VV*VV;
   beta_len = KK*VV;
@@ -22,27 +26,34 @@ extern "C" SEXP dpgmmR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP G, SEXP K, SEXP N, 
   fvec xTy(xTy_p, xTy_p + xTy_len);
   fvec xTx(xTx_p, xTx_p + xTx_len);
   
-  fvec beta(KK*VV);
+  fvec beta(beta_len);
   fvec pi(KK);
   uvec z(GG);
   fvec weights(GG*KK);
   fvec Gk(KK);
+  //initialize pi and sigma2
+  for(int k=0; k<KK; k++) pi[k] = 1.0/KK;
   double sigma2 = 1;
   
-  SEXP beta_out = Ralloc_Real(beta_len);
-  SEXP pi_out = Ralloc_Real(KK);
+  SEXP beta_out = Ralloc_Real(beta_len*I);
+  SEXP pi_out = Ralloc_Real(KK*I);
   SEXP list_out = Ralloc_List(2);
   
-  draw_z(weights, z, GG, KK);
-  draw_theta(beta, &sigma2, z, &yTy, xTy, xTx, Gk, GG, KK, VV, NN);
-  draw_pi(pi, Gk, KK, 1.0);
+  for(int i=0; i<I; i++){
+    print_mat(weights, GG, KK);
+    compute_weights(weights, xTy, xTx, beta, pi, GG, KK, NN, VV);
+    draw_z(weights, z, GG, KK);
+    print_mat(weights, GG, KK);
+    print_mat(z, 1, GG);
+    draw_theta(beta, &sigma2, z, &yTy, xTy, xTx, Gk, GG, KK, VV, NN);
+    draw_pi(pi, Gk, KK, 1.0);
   
-  for(int i=0; i<beta_len; i++)
-    REAL(beta_out)[i] = beta[i];
+    for(int j=0; j<beta_len; j++)
+      REAL(beta_out)[i*beta_len + j] = beta[j];
   
-  for(int i=0; i<KK; i++)
-    REAL(pi_out)[i] = pi[i];
-  
+    for(int j=0; j<KK; j++)
+      REAL(pi_out)[i*KK + j] = pi[j];
+  }
   SET_VECTOR_ELT(list_out, 0, beta_out);
   SET_VECTOR_ELT(list_out, 1, pi_out);
   
