@@ -1,20 +1,22 @@
-context("solve linear equations")
+context("cluster_stats")
 
 set.seed(61016)
 V <- 2
-X <- matrix(c(1,1,1,-1),V,V)
 G <- 10
-n <- 3
+N <- 10
 K <- 5
-d <- generate_data(X, n, G, K)
+X <- matrix(c(1,1,1,-1), V, V)
+
+d <- generate_data(X, N, G, K)
 
 k <- as.numeric(names(which.max(table(d$z))))
 
-stats <- with(d, cluster_stats(k, xTy, xTx, G, 2, n, z))
+
+stats <- with(d, cluster_stats(k, xTy, xTx, G, 2, N, z))
 
 XTY <- with(d, rowSums(xTy[,z==k]))
 
-Vinv <- d$xTx * stats[[1]] * n + diag(V)
+Vinv <- d$xTx * stats[[1]] + diag(V)
 
 V <- solve(Vinv)
 

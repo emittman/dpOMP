@@ -52,7 +52,7 @@ int invert_lower_tri(int n, double *A){
   return info;
 }
 
-double ddot(int n, double *x, double *y){
+double inner_prod_vec(int n, double *x, double *y){
   int incx = 1, incy = 1;
   double out;
   out = ddot_(&n, x, &incx, y, &incy);
@@ -65,7 +65,7 @@ void linear_comb_vec(int n, double alpha, const fvec &x, fvec &y){
   daxpy_(&n, &alpha, &(x[0]), &incx, &(y[0]), &incy);
 }
 
-void dsymv(int n, double alpha, double *A, double *x, double beta, double *y){
+void linear_comb_mat_vec(int n, double alpha, double *A, double *x, double beta, double *y){
   /* y <- alpha * A %*% x + beta * y; scalars{alpha, beta}, vectors{x, y}, matrices{A}*/
  char uplo[] = "U";
  int lda = n, incx = 1, incy = 1;
@@ -84,8 +84,8 @@ void multiply_mat_vec(int m, int n, const fvec &A, const fvec &invec, fvec &outv
 double quad_form(int n, double *x, double *A){
   double out;
   fvec y(n);
-  dsymv(n, 1, A, x, 1, &(y[0])); //y <- A%*%x
-  out = ddot(n, x, &(y[0]));
+  linear_comb_mat_vec(n, 1, A, x, 1, &(y[0])); //y <- A%*%x
+  out = inner_prod_vec(n, x, &(y[0]));
   return out;
 }
 

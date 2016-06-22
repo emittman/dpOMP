@@ -11,7 +11,6 @@ void draw_z(fvec &weights, uvec &z, int G, int K){
   for(int g=0; g<G; g++){
     
     fveci weights_iter = weights.begin() + K*g;
-    norm_exp_lp(weights_iter, K);
     z[g] = rcategorical(weights_iter, K);
     
   }

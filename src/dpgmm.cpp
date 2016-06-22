@@ -40,14 +40,16 @@ extern "C" SEXP dpgmmR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP G, SEXP V, SEXP K, 
   SEXP list_out = Ralloc_List(2);
   
   for(int i=0; i<I; i++){
-    print_mat(weights, GG, KK);
-    compute_weights(weights, xTy, xTx, beta, pi, GG, KK, NN, VV);
+    // print_mat(weights, GG, KK);
+    compute_weights(weights, xTy, xTx, beta, pi, sigma2, GG, KK, VV);
     draw_z(weights, z, GG, KK);
-    print_mat(weights, GG, KK);
+    Rprintf("allocation iter %d:\n",i);
     print_mat(z, 1, GG);
+    // print_mat(weights, GG, KK);
+    // print_mat(z, 1, GG);
     draw_theta(beta, &sigma2, z, &yTy, xTy, xTx, Gk, GG, KK, VV, NN);
     draw_pi(pi, Gk, KK, 1.0);
-  
+    Rprintf("iter %d: sigma2 = %lf\n", i, sigma2);
     for(int j=0; j<beta_len; j++)
       REAL(beta_out)[i*beta_len + j] = beta[j];
   
@@ -68,41 +70,39 @@ extern "C" SEXP pi_primeR(SEXP yTx, SEXP xTx, SEXP beta, SEXP pi, SEXP sigma2, S
   yTx_p  = NUMERIC_POINTER(yTx);
   xTx_p  = NUMERIC_POINTER(xTx);
   beta_p = NUMERIC_POINTER(beta);
-  fvec yTx_c(yTx_p,  yTx_p  + v);
-  fvec xTx_c(xTx_p,  xTx_p  + v*v);
-  fvec beta_c(beta_p, beta_p + v);
+  fvec xTx_c(xTx_p, xTx_p + v*v);
   pi_c = REAL(pi)[0];
   sigma2_c = REAL(sigma2)[0];
   
   SEXP out = Ralloc_Real(1);
-  REAL(out)[0] = pi_prime(yTx_c.begin(), xTx_c, beta_c.begin(), pi_c, sigma2_c, v);
+  REAL(out)[0] = pi_prime(yTx_p, xTx_c, beta_p, pi_c, sigma2_c, v);
   
   UNPROTECT(1);
   return out;
 }
 
-extern "C" SEXP compute_weightsR(SEXP yTx, SEXP xTx, SEXP beta, SEXP pi, SEXP G, SEXP K, SEXP n, SEXP V){
-  double *yTx_p, *xTx_p, *beta_p, *pi_p;
-  int GG, KK, nn, VV;
-  yTx_p  = NUMERIC_POINTER(yTx);
+extern "C" SEXP compute_weightsR(SEXP xTy, SEXP xTx, SEXP beta, SEXP pi, SEXP sigma2, SEXP G, SEXP K, SEXP V){
+  double *xTy_p, *xTx_p, *beta_p, *pi_p, S;
+  int GG, KK, VV;
+  xTy_p  = NUMERIC_POINTER(xTy);
   xTx_p  = NUMERIC_POINTER(xTx);
   beta_p = NUMERIC_POINTER(beta);
   pi_p   = NUMERIC_POINTER(pi);
+  S = REAL(sigma2)[0];
   GG = INTEGER(G)[0];
   KK = INTEGER(K)[0];
-  nn = INTEGER(n)[0];
   VV = INTEGER(V)[0];
-  fvec arg0(GG*KK); //WEIGHTS
-  fvec arg1(yTx_p,  yTx_p  + GG*VV);
-  fvec arg2(xTx_p,  xTx_p  + VV*VV);
-  fvec arg3(beta_p, beta_p + KK*VV);
-  fvec arg4(pi_p, pi_p + KK);
+  fvec wts(GG*KK); //WEIGHTS
+  fvec XTY(xTy_p,  xTy_p  + GG*VV);
+  fvec XTX(xTx_p,  xTx_p  + VV*VV);
+  fvec B(beta_p, beta_p + KK*VV);
+  fvec P(pi_p, pi_p + KK);
   
-  compute_weights(arg0, arg1, arg2, arg3, arg4, GG, KK, nn, VV);
+  compute_weights(wts, XTY, XTX, B, P, S, GG, KK, VV);
   
   SEXP out = Ralloc_Real(GG*KK);
   for(int i=0; i<GG*KK; i++)
-    REAL(out)[i] = arg0[i];
+    REAL(out)[i] = wts[i];
   UNPROTECT(1);
   return out;
 }
@@ -111,7 +111,7 @@ extern "C" SEXP ddotR(SEXP n, SEXP x, SEXP y){
   int N = INTEGER(n)[0];
   double *X = NUMERIC_POINTER(x), *Y = NUMERIC_POINTER(y);
   SEXP result = Ralloc_Real(1);
-  REAL(result)[0] = ddot(N, X, Y);
+  REAL(result)[0] = inner_prod_vec(N, X, Y);
   UNPROTECT(1);
   return result;
 }

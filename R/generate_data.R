@@ -29,5 +29,5 @@ generate_data <- function(X, N, G, K, beta=NULL, pi=NULL){
        y=y,
        X = Xexpand,
        xTy = t(Xexpand)%*%t(y),
-       xTx = t(X)%*%X)
+       xTx = t(Xexpand)%*%Xexpand)
 }

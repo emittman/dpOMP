@@ -4,7 +4,7 @@
 \alias{compute_weights}
 \title{Get component weights for all genes}
 \usage{
-compute_weights(yTx, xTx, beta, pi, G, K, n, V)
+compute_weights(yTx, xTx, beta, pi, sigma2, G, K, V)
 }
 \arguments{
 \item{yTx}{numeric vector of length G*V}
@@ -15,13 +15,15 @@ compute_weights(yTx, xTx, beta, pi, G, K, n, V)
 
 \item{pi}{numeric vector of length K}
 
+\item{sigma2}{double}
+
 \item{G}{int}
 
 \item{K}{int}
 
-\item{n}{int}
-
 \item{V}{int}
+
+\item{n}{int}
 }
 \description{
 Get component weights for all genes

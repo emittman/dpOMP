@@ -14,11 +14,10 @@
 #' 
 #' @export
 dpgmm <- function(data, design, G, V, K, N, iter){
-  Xexpand <- matrix(rep(design, each=N), V*N, V)
   yTy <- sapply(1:G, function(g) data[g,]%*%data[g,])
   yTy <- sum(yTy)
-  xTy <- t(Xexpand) %*% t(data)
-  xTx <- crossprod(design)*N
+  xTy <- t(design) %*% t(data)
+  xTx <- crossprod(design)
   
   out <- .Call("dpgmmR",
                as.numeric(yTy),

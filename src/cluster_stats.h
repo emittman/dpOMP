@@ -22,7 +22,7 @@ void get_k_indices(const uvec &z, fvec &indic, int k){
 }
 
 void construct_precision_mat(const fvec &xTx, fvec &chol_S, double Gk, double lambda, int V, int n){
-  std::transform(xTx.begin(), xTx.end(), chol_S.begin(), std::bind2nd(std::multiplies<double>(), Gk*n));
+  std::transform(xTx.begin(), xTx.end(), chol_S.begin(), std::bind2nd(std::multiplies<double>(), Gk));
   for(int i=0; i<V; i++)
     chol_S[i*V+i] += lambda;
 }
@@ -33,7 +33,7 @@ void increment_IGscale(fveci IGscale, const fvec &chol_Sinv, fvec beta_hat){
   //increment IGscale by product * 1/2
   int n = beta_hat.size();
   multiply_lowertri_vec(n, chol_Sinv, beta_hat);
-  *IGscale = ddot(n, &(beta_hat[0]), &(beta_hat[0]));
+  *IGscale = inner_prod_vec(n, &(beta_hat[0]), &(beta_hat[0]));
 }
 
 double get_cluster_size(fvec &indices){
@@ -46,33 +46,38 @@ void cluster_stats(int k, fvec &xTy, const fvec &xTx, int G, int V, int n,
                    fvec &beta_hat, fvec &chol_S, fveci IGscale){
     fvec indic(G);
     get_k_indices(z, indic, k);
-    
     *Gkk = get_cluster_size(indic);
     
-    Rprintf("xTy:\n");
-    print_mat(xTy, G, V);
+//     Rprintf("xTy:\n");
+//     print_mat(xTy, G, V);
     
-    Rprintf("indices:\n");
-    print_mat(indic, 1, G);
-    
-    multiply_mat_vec(V, G, xTy, indic, beta_hat, 0); // sum xTy for g: z_g==k, last arg means trans = "F"
-    Rprintf("xTyk:\n");
-    print_mat(beta_hat, 1, V);
-    
-    construct_precision_mat(xTx, chol_S, *Gkk, 1.0, V, n); // S_inv = (X^T * X + lambda * I)
-    Rprintf("prec:\n");
-    print_mat(chol_S, V, V);
-      
-    
-    solve_normaleq_symm_mat(V, &(chol_S[0]), &(beta_hat[0])); // solve normal equation X^Ty = S_inv * beta_hat, convert S_inv to cholesky factor
-    Rprintf("betahat:\n");
-    print_mat(beta_hat, 1, V);
-    
+//     Rprintf("indices:\n");
+//     print_mat(indic, 1, G);
+
+// sum xTy for g: z_g==k, last arg means trans = "F"    
+    multiply_mat_vec(V, G, xTy, indic, beta_hat, 0); 
+//     Rprintf("xTyk:\n");
+//     print_mat(beta_hat, 1, V);
+
+// S_inv = (X^T * X + lambda * I)
+    construct_precision_mat(xTx, chol_S, *Gkk, 1.0, V, n);
+//     Rprintf("prec:\n");
+//     print_mat(chol_S, V, V);
+//       
+// solve normal equation X^Ty = S_inv * beta_hat, convert S_inv to cholesky factor
+    solve_normaleq_symm_mat(V, &(chol_S[0]), &(beta_hat[0])); 
+//     Rprintf("betahat:\n");
+//     print_mat(beta_hat, 1, V);
+
+// compute contribution from cluster K to IGscale
     increment_IGscale(IGscale, chol_S, beta_hat);
-    Rprintf("IG:\n");
-    Rprintf("%lf\n",*IGscale);
-    invert_lower_tri(V, &(chol_S[0])); // invert S_inv 
-  
+//     Rprintf("IG:\n");
+//     Rprintf("%lf\n",*IGscale);
+
+// invert S_inv so that chol_S now contains cholesky factor of (XTX + lambda I)^{-1}
+    invert_lower_tri(V, &(chol_S[0])); 
+    Rprintf("var:\n");
+    print_mat(chol_S, V, V);
 }
 
 #endif
