@@ -1,6 +1,7 @@
 #include "includes.h"
 
 #define Ralloc_Real(len)  PROTECT(allocVector(REALSXP, (len)))
+#define Ralloc_Int(len)   PROTECT(allocVector(INTSXP, (len)))
 #define Ralloc_List(len)  PROTECT(allocVector(VECSXP, (len)))
 
 extern "C" SEXP dpgmmR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP G, SEXP V, SEXP K, SEXP N, SEXP iter){
@@ -389,4 +390,21 @@ extern "C" SEXP linear_comb_vecR(SEXP n, SEXP alpha, SEXP x, SEXP y){
     REAL(yout)[i] = yC[i];
   UNPROTECT(1);
   return yout;
+}
+
+extern "C" SEXP send_chain(SEXP yTy, SEXP xTy, SEXP xTx, SEXP G, SEXP K, SEXP V, SEXP N){
+  int GG = INTEGER(G)[0];
+  int KK = INTEGER(K)[0];
+  int VV = INTEGER(V)[0];
+  int NN = INTEGER(N)[0];
+  double *yTy_p = NUMERIC_POINTER(yTy);
+  double *xTy_p = NUMERIC_POINTER(xTy);
+  double *xTx_p = NUMERIC_POINTER(xTx);
+  chain_t chain = construct_chain(yTy_p, xTy_p, xTx_p, GG, KK, VV, NN);
+  initialize_chain(chain);
+  print_chain_state(chain);
+  SEXP out = Ralloc_Int(1);
+  INTEGER(out)[0] = 0;
+  UNPROTECT(1);
+  return out;
 }

@@ -25,4 +25,5 @@
 #include "sample_wrappers.h"
 #include "draw_pi.h"
 #include "debug_print.h"
+#include "chain.h"
 #endif //INCLUDES_H
