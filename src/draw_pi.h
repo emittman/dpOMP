@@ -4,6 +4,7 @@
 #include <Rmath.h>
 #include "sample_wrappers.h"
 #include "debug_print.h"
+#include "chain.h"
 
 void get_tail_sums(const fvec &counts, fvec &tail_sums){
   
@@ -16,24 +17,24 @@ void get_tail_sums(const fvec &counts, fvec &tail_sums){
 }
 
 
-
-void draw_pi(fvec &pi, const fvec &Gk, int K, double alpha){
+void draw_pi(chain_t &chain, double alpha){
+  int K = chain.K;
   fvec tail_sums(K);
   double V;
   double log_1minusV = 0;
   //print_fmat(Gk, 1, K);
-  get_tail_sums(Gk, tail_sums);
+  get_tail_sums(chain.Gk, tail_sums);
   
   for(int i=0; i<K; i++){
     if(i == 0){
-      V = rbeta(Gk[i] + 1, tail_sums[i] + alpha);
-      pi[i] = V;
+      V = rbeta(chain.Gk[i] + 1, tail_sums[i] + alpha);
+      chain.pi[i] = V;
       log_1minusV = log(1 - V);
     }else if(i == K-1){
-      pi[i] = exp(log_1minusV);
+      chain.pi[i] = exp(log_1minusV);
     } else {
-      V = rbeta(Gk[i] + 1, tail_sums[i] + alpha);
-      pi[i] = V * exp(log_1minusV);
+      V = rbeta(chain.Gk[i] + 1, tail_sums[i] + alpha);
+      chain.pi[i] = V * exp(log_1minusV);
       log_1minusV = log(1 - V) + log_1minusV;
     }
   }

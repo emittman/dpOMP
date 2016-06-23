@@ -1,5 +1,5 @@
-#ifndef UTIL_CHAIN_H
-#define UTIL_CHAIN_H
+#ifndef CHAIN_H
+#define CHAIN_H
 
 #include <Rmath.h>
 #include "types.h"
@@ -17,6 +17,9 @@ typedef struct {
   int K;
   int V;
   int N;
+  uvec z;
+  fvec weights;
+  fvec Gk;
 
 } chain_t;
 
@@ -32,6 +35,9 @@ chain_t construct_chain(double *yTy_p, double *xTy_p, double *xTx_p, int GG, int
   chain.K = KK;
   chain.V = VV;
   chain.N = NN;
+  chain.z = uvec(GG);
+  chain.weights = fvec(GG*KK);
+  chain.Gk = fvec(KK);
   
   return chain;
 }
@@ -52,6 +58,10 @@ void initialize_chain(chain_t &chain){
 
 void print_chain_state(chain_t &chain){
   
+  Rprintf("z:\n");
+  print_mat(chain.z, 1, chain.G);
+  Rprintf("Gk:\n");
+  print_mat(chain.Gk, 1, chain.K);
   Rprintf("beta:\n");
   print_mat(chain.beta, chain.V, chain.K);
   Rprintf("pi:\n");
@@ -59,4 +69,4 @@ void print_chain_state(chain_t &chain){
   Rprintf("sigma2:\n %lf \n",chain.sigma2);
 }
 
-#endif // UTIL_CHAIN_H
+#endif // CHAIN_H
