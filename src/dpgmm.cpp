@@ -66,7 +66,7 @@ extern "C" SEXP dpgmmR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP G, SEXP V, SEXP K, 
       for(int k=0; k<VV; k++)
         REAL(beta_g_out)[offset + j*VV + k] = beta[z[j]*VV + k];
     
-    REAL(sigma2_out)[0] = sigma2;
+    REAL(sigma2_out)[i] = sigma2;
   }
   SET_VECTOR_ELT(list_out, 0, beta_out);
   SET_VECTOR_ELT(list_out, 1, pi_out);
