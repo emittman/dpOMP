@@ -36,8 +36,10 @@ extern "C" SEXP dpgmmR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP G, SEXP V, SEXP K, 
   double sigma2 = 1;
   
   SEXP beta_out = Ralloc_Real(beta_len*I);
+  SEXP beta_g_out = Ralloc_Real(GG*I);
+  SEXP sigma2_out = Ralloc_Real(I);
   SEXP pi_out = Ralloc_Real(KK*I);
-  SEXP list_out = Ralloc_List(2);
+  SEXP list_out = Ralloc_List(4);
   
   for(int i=0; i<I; i++){
     // print_mat(weights, GG, KK);
@@ -50,16 +52,28 @@ extern "C" SEXP dpgmmR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP G, SEXP V, SEXP K, 
     draw_theta(beta, &sigma2, z, &yTy, xTy, xTx, Gk, GG, KK, VV, NN);
     draw_pi(pi, Gk, KK, 1.0);
     Rprintf("iter %d: sigma2 = %lf\n", i, sigma2);
+    
+    int offset = i*beta_len;
     for(int j=0; j<beta_len; j++)
-      REAL(beta_out)[i*beta_len + j] = beta[j];
+      REAL(beta_out)[offset + j] = beta[j];
   
+    offset = i*KK;
     for(int j=0; j<KK; j++)
-      REAL(pi_out)[i*KK + j] = pi[j];
+      REAL(pi_out)[offset + j] = pi[j];
+    
+    offset = i*GG*VV;
+    for(int j=0; j<GG; j++)
+      for(int k=0; k<VV; k++)
+        REAL(beta_g_out)[offset + j*VV + k] = beta[z[j]*VV + k];
+    
+    REAL(sigma2_out)[0] = sigma2;
   }
   SET_VECTOR_ELT(list_out, 0, beta_out);
   SET_VECTOR_ELT(list_out, 1, pi_out);
+  SET_VECTOR_ELT(list_out, 2, beta_g_out);
+  SET_VECTOR_ELT(list_out, 3, sigma2_out);
   
-  UNPROTECT(3);
+  UNPROTECT(5);
   
   return list_out;
 }

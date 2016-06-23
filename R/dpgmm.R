@@ -29,8 +29,9 @@ dpgmm <- function(data, design, G, V, K, N, iter){
                as.integer(N),
                as.integer(iter),
                PACKAGE = "dpOMP")
-  names(out) <- c("beta", "pi")
+  names(out) <- c("beta", "pi", "beta_g", "sigma2")
   out$beta <- array(out$beta, dim=c(V, K, iter))
   out$pi <- array(out$pi, dim=c(K, iter))
+  out$beta_g <- array(out$beta_g, dim=c(V, G, iter))
   return(out)
 }
