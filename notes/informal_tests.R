@@ -1,3 +1,5 @@
+library(dpOMP)
+
 set.seed(6251148)
 
 G = 1
@@ -6,7 +8,8 @@ K = 10
 N = 10
 
 d <- generate_data(X = diag(1), G=G, K=K, N=N)
-out <- dpgmm(d$y, d$X, G, V, K, N, iter=1000)
+out <- dpgmm(d$y, d$X, G, V, K, N, iter=10000)
+
 #hist out$beta_g should match N(d$xTy/11, sd(d$y)/sqrt(11))
 hist(out$beta_g, prob=T, 30)
 curve(dnorm(x, d$xTy/11, sd(d$y)/sqrt(11)), add=T, lty=2)
@@ -25,29 +28,40 @@ row.names(prop_tbl) <- c("actual","expected","difference")
 prop_tbl
 
 ####
-G = 100
+G = 10000
 V = 1
 modelK = 50
 trueK = 10
 N = 9
-d <- generate_data(X = diag(1), G=G, K=trueK, N=N)
+d <- generate_data(X = diag(V), G=G, K=trueK, N=N)
 d$z
 out <- dpgmm(d$y, d$X, G, V, modelK, N, iter=10000)
 
 #identification of true locations
-hist(out$beta_g)
-abline(v=c(d$beta), lty=2)
+dens = density(out$beta_g)
+plot(dens)
+abline(v=d$beta, lty=2)
+
+# shrinkage
+data_means = rowMeans(d$y)
+post_means = rowMeans(out$beta_g[,,])
+plot(data_means, post_means)
+abline(0,1, col='red')
 
 #correct pooling of information
-hist(out$beta_g[,d$z==1,], prob=T, 30)
+hist(out$beta_g[,d$z==1,], prob=T, 30, main="correct pooling of information")
 Gk = sum(d$z==1)
 curve(dnorm(x, sum(d$xTy[d$z==1])/(Gk*N + 1), sd(d$y[d$z==2,])/sqrt(Gk*N + 1)), add=T, lty=2)
 abline(v = mean(out$beta_g[,d$z==1,]))
 
 #shrinkage?
-hist(out$beta_g[,48,], prob=T, 30)
-curve(dnorm(x, sum(d$xTy[48])/(N+1), sd(d$y[48,])/sqrt(N + 1)), add=T, lty=2)
-abline(v = d$beta[d$z[48]])
+opar = par(mfrow=c(4,4))
+genes = sort(sample(G,16,replace=FALSE))
+for (g in genes) {
+hist(out$beta_g[,g,], prob=T, 30, main=paste("Gene=",g))
+curve(dnorm(x, sum(d$xTy[g])/(N+1), sd(d$y[g,])/sqrt(N + 1)), add=T, lty=2)
+abline(v = d$beta[d$z[g]])
+}
 
 #number of occupied clusters
 occupied <- sapply(1:10000, function(i) sum(out$beta[1,,i] %in% out$beta_g[1,,i]))
