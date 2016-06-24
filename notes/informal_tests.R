@@ -70,3 +70,20 @@ hist(occupied, breaks = 1:50+.5)
 #maximum index of significant pi
 max_index <- sapply(1:10000, function(i) max(which(out$pi[,i]>.005)))
 hist(max_index, breaks = 1:50+.5)
+
+
+####
+G = 1000
+V = 2
+modelK = 50
+trueK = 8
+N = 10
+d <- generate_data(X = diag(V), G=G, K=trueK, N=N)
+d$z
+out <- dpgmm(d$y, d$X, G, V, modelK, N, iter=10000)
+
+Bhat <- data.frame(V1 = as.numeric(out$beta_g[1,,]), V2 = as.numeric(out$beta_g[2,,]))
+Btrue <- data.frame(V1 = as.numeric(d$beta[1,]), V2 = as.numeric(d$beta[2,]))
+library(ggplot2)
+require(hexbin)
+ggplot(Bhat, aes(x=V1, y=V2)) + geom_hex() + geom_point(data = Btrue, color="red")
