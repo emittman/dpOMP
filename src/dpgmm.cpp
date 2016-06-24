@@ -23,7 +23,7 @@ extern "C" SEXP dpgmmR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP G, SEXP V, SEXP K, 
   initialize_chain(chain);
   
   SEXP beta_out = Ralloc_Real(beta_len*I);
-  SEXP beta_g_out = Ralloc_Real(GG*I);
+  SEXP beta_g_out = Ralloc_Real(GG*VV*I);
   SEXP sigma2_out = Ralloc_Real(I);
   SEXP pi_out = Ralloc_Real(KK*I);
   SEXP list_out = Ralloc_List(4);
