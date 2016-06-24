@@ -21,3 +21,20 @@ prop_tbl <- rbind(table(s)/1e5,
       round(table(s)/1e5- exp(w)[as.integer(names(table(s))) + 1],5))
 row.names(prop_tbl) <- c("actual","expected","difference")
 prop_tbl
+
+G = 100
+V = 1
+modelK = 15
+trueK = 3
+N = 9
+d <- generate_data(X = diag(1), G=G, K=trueK, N=N)
+d$z
+out <- dpgmm(d$y, d$X, G, V, modelK, N, iter=10000)
+hist(out$beta_g[,d$z==2,], prob=T, 30)
+Gk = sum(d$z==2)
+curve(dnorm(x, sum(d$xTy[d$z==2])/(Gk*N + 1), sd(d$y[d$z==2,])/sqrt(Gk*N + 1)), add=T, lty=2)
+abline(v = mean(out$beta_g[,d$z==2,]))
+
+hist(out$beta_g[,50,], prob=T, 30)
+curve(dnorm(x, sum(d$xTy[50])/(N+1), sd(d$y[50,])/sqrt(N + 1)), add=T, lty=2)
+abline(v = d$beta[d$z[50]])

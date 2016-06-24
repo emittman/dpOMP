@@ -353,14 +353,13 @@ extern "C" SEXP draw_thetaR(SEXP z, SEXP yTy, SEXP xTy, SEXP xTx, SEXP G, SEXP K
   GetRNGstate();
   draw_theta(chain);
   PutRNGstate();
-  //left off here
   SEXP out = Ralloc_List(2);
   SEXP beta = Ralloc_Real(KK*VV);
   SEXP sigma2 = Ralloc_Real(1);
   
   for(int i=0; i<(KK*VV); i++)
-    REAL(beta)[i] = betaC[i];
-  REAL(sigma2)[0] = sigma2C;
+    REAL(beta)[i] = chain.beta[i];
+  REAL(sigma2)[0] = chain.sigma2;
   
   SET_VECTOR_ELT(out, 0, beta);
   SET_VECTOR_ELT(out, 1, sigma2);
