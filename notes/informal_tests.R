@@ -1,3 +1,5 @@
+set.seed(6251148)
+
 G = 1
 V = 1
 K = 10
@@ -22,19 +24,35 @@ prop_tbl <- rbind(table(s)/1e5,
 row.names(prop_tbl) <- c("actual","expected","difference")
 prop_tbl
 
+####
 G = 100
 V = 1
-modelK = 15
-trueK = 3
+modelK = 50
+trueK = 10
 N = 9
 d <- generate_data(X = diag(1), G=G, K=trueK, N=N)
 d$z
 out <- dpgmm(d$y, d$X, G, V, modelK, N, iter=10000)
-hist(out$beta_g[,d$z==2,], prob=T, 30)
-Gk = sum(d$z==2)
-curve(dnorm(x, sum(d$xTy[d$z==2])/(Gk*N + 1), sd(d$y[d$z==2,])/sqrt(Gk*N + 1)), add=T, lty=2)
-abline(v = mean(out$beta_g[,d$z==2,]))
 
-hist(out$beta_g[,50,], prob=T, 30)
-curve(dnorm(x, sum(d$xTy[50])/(N+1), sd(d$y[50,])/sqrt(N + 1)), add=T, lty=2)
-abline(v = d$beta[d$z[50]])
+#identification of true locations
+hist(out$beta_g)
+abline(v=c(d$beta), lty=2)
+
+#correct pooling of information
+hist(out$beta_g[,d$z==1,], prob=T, 30)
+Gk = sum(d$z==1)
+curve(dnorm(x, sum(d$xTy[d$z==1])/(Gk*N + 1), sd(d$y[d$z==2,])/sqrt(Gk*N + 1)), add=T, lty=2)
+abline(v = mean(out$beta_g[,d$z==1,]))
+
+#shrinkage?
+hist(out$beta_g[,48,], prob=T, 30)
+curve(dnorm(x, sum(d$xTy[48])/(N+1), sd(d$y[48,])/sqrt(N + 1)), add=T, lty=2)
+abline(v = d$beta[d$z[48]])
+
+#number of occupied clusters
+occupied <- sapply(1:10000, function(i) sum(out$beta[1,,i] %in% out$beta_g[1,,i]))
+hist(occupied, breaks = 1:50+.5)
+
+#maximum index of significant pi
+max_index <- sapply(1:10000, function(i) max(which(out$pi[,i]>.005)))
+hist(max_index, breaks = 1:50+.5)

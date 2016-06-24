@@ -76,8 +76,8 @@ void cluster_stats(int k, fvec &xTy, const fvec &xTx, int G, int V, int n,
 
 // invert S_inv so that chol_S now contains cholesky factor of (XTX + lambda I)^{-1}
     invert_lower_tri(V, &(chol_S[0])); 
-    Rprintf("var:\n");
-    print_mat(chol_S, V, V);
+    // Rprintf("var:\n");
+    // print_mat(chol_S, V, V);
 }
 
 #endif

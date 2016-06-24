@@ -38,7 +38,7 @@ extern "C" SEXP dpgmmR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP G, SEXP V, SEXP K, 
     // print_mat(z, 1, GG);
     draw_theta(chain);
     draw_pi(chain, 1.0); //second arg is alpha of DP(alpha P_0) fame
-    Rprintf("iter %d: sigma2 = %lf\n", i, chain.sigma2);
+    // Rprintf("iter %d: sigma2 = %lf\n", i, chain.sigma2);
     
     int offset = i*beta_len;
     for(int j=0; j<beta_len; j++)
