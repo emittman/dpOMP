@@ -4,6 +4,72 @@
 #define Ralloc_Int(len)   PROTECT(allocVector(INTSXP, (len)))
 #define Ralloc_List(len)  PROTECT(allocVector(VECSXP, (len)))
 
+extern "C" SEXP dpgmm_initR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP betaR, SEXP piR, SEXP sigma2R, SEXP G, SEXP V, SEXP K, SEXP N, SEXP iter){
+  int GG, KK, NN, VV, beta_len, I;
+  GG = INTEGER(G)[0];
+  KK = INTEGER(K)[0];
+  NN = INTEGER(N)[0];
+  VV = INTEGER(V)[0];
+  I = INTEGER(iter)[0];
+  beta_len = KK*VV;
+  
+  double yTy, *xTy_p, *xTx_p, *beta_p, *pi_p;
+  yTy = REAL(yTyR)[0];
+  xTy_p = NUMERIC_POINTER(xTyR);
+  xTx_p = NUMERIC_POINTER(xTxR);
+  beta_p = NUMERIC_POINTER(betaR);
+  pi_p = NUMERIC_POINTER(piR);
+
+  chain_t chain = construct_chain(&yTy, xTy_p, xTx_p, GG, KK, VV, NN);
+  
+  //initialize_chain(chain);
+  std::copy(beta_p, beta_p + beta_len, chain.beta.begin());
+  std::copy(pi_p, pi_p + KK, chain.pi.begin());
+  chain.sigma2 = REAL(sigma2R)[0];
+  
+  SEXP beta_out = Ralloc_Real(beta_len*I);
+  SEXP beta_g_out = Ralloc_Real(GG*VV*I);
+  SEXP sigma2_out = Ralloc_Real(I);
+  SEXP pi_out = Ralloc_Real(KK*I);
+  SEXP list_out = Ralloc_List(4);
+  
+  for(int i=0; i<I; i++){
+    // print_mat(weights, GG, KK);
+    compute_weights(chain);
+    draw_z(chain);
+    //     Rprintf("allocation iter %d:\n",i);
+    //     print_mat(z, 1, GG);
+    // print_mat(weights, GG, KK);
+    // print_mat(z, 1, GG);
+    draw_theta(chain);
+    draw_pi(chain, 1.0); //second arg is alpha of DP(alpha P_0) fame
+    // Rprintf("iter %d: sigma2 = %lf\n", i, chain.sigma2);
+    
+    int offset = i*beta_len;
+    for(int j=0; j<beta_len; j++)
+      REAL(beta_out)[offset + j] = chain.beta[j];
+    
+    offset = i*KK;
+    for(int j=0; j<KK; j++)
+      REAL(pi_out)[offset + j] = chain.pi[j];
+    
+    offset = i*GG*VV;
+    for(int j=0; j<GG; j++)
+      for(int k=0; k<VV; k++)
+        REAL(beta_g_out)[offset + j*VV + k] = chain.beta[chain.z[j]*VV + k];
+    
+    REAL(sigma2_out)[i] = chain.sigma2;
+  }
+  SET_VECTOR_ELT(list_out, 0, beta_out);
+  SET_VECTOR_ELT(list_out, 1, pi_out);
+  SET_VECTOR_ELT(list_out, 2, beta_g_out);
+  SET_VECTOR_ELT(list_out, 3, sigma2_out);
+  
+  UNPROTECT(5);
+  
+  return list_out;
+}
+
 extern "C" SEXP dpgmmR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP G, SEXP V, SEXP K, SEXP N, SEXP iter){
   int GG, KK, NN, VV, beta_len, I;
   GG = INTEGER(G)[0];

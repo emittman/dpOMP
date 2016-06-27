@@ -74,7 +74,7 @@ hist(max_index, breaks = 1:50+.5)
 
 ####
 G = 1000
-V = 2
+V = 3
 modelK = 50
 trueK = 8
 N = 10
@@ -86,4 +86,4 @@ Bhat <- data.frame(V1 = as.numeric(out$beta_g[1,,]), V2 = as.numeric(out$beta_g[
 Btrue <- data.frame(V1 = as.numeric(d$beta[1,]), V2 = as.numeric(d$beta[2,]))
 library(ggplot2)
 require(hexbin)
-ggplot(Bhat, aes(x=V1, y=V2)) + geom_hex() + geom_point(data = Btrue, color="red")
+ggplot(Bhat, aes(x=V1, y=V2)) + geom_hex(bins=50) + geom_point(data = Btrue, color="red")
