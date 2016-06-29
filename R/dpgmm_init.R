@@ -29,7 +29,7 @@ dpgmm_init <- function(data, design, G, V, K, N, iter, init_iter){
                as.integer(init_iter),
                PACKAGE = "dpOMP")
   names(init_out) <- c("beta", "pi", "beta_g", "sigma2")
-  init_out$beta <- array(out$beta, dim=c(V, K, iter))
+  init_out$beta <- array(init_out$beta, dim=c(V, K, iter))
   init_out$pi <- array(init_out$pi, dim=c(K, iter))
   init_out$beta_g <- array(init_out$beta_g, dim=c(V, G, iter))
   init <- list()

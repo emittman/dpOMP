@@ -35,7 +35,8 @@ trueK = 10
 N = 9
 d <- generate_data(X = diag(V), G=G, K=trueK, N=N)
 d$z
-out <- dpgmm(d$y, d$X, G, V, modelK, N, iter=10000)
+# out <- dpgmm(d$y, d$X, G, V, modelK, N, iter=10000)
+out <- dpgmm_init(d$y, d$X, G, V, modelK, N, iter=10000, init_iter=2000)
 
 #identification of true locations
 dens = density(out$beta_g)
@@ -71,6 +72,8 @@ hist(occupied, breaks = 1:50+.5)
 max_index <- sapply(1:10000, function(i) max(which(out$pi[,i]>.005)))
 hist(max_index, breaks = 1:50+.5)
 
+#saveRDS(out, file="samples_wo_inits.rds")
+saveRDS(out, file="samples_with_inits.rds")
 
 ####
 G = 1000
@@ -87,3 +90,5 @@ Btrue <- data.frame(V1 = as.numeric(d$beta[1,]), V2 = as.numeric(d$beta[2,]))
 library(ggplot2)
 require(hexbin)
 ggplot(Bhat, aes(x=V1, y=V2)) + geom_hex(bins=50) + geom_point(data = Btrue, color="red")
+
+

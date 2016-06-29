@@ -4,7 +4,7 @@
 \alias{dpgmm_init}
 \title{Run MCMC for DPGMMM model, utilizing pilot chain}
 \usage{
-dpgmm_init(data, design, G, V, N, iter, init_iter)
+dpgmm_init(data, design, G, V, K, N, iter, init_iter)
 }
 \arguments{
 \item{data}{A column-major $\eqn{G \cdot VN}$ gene expressionvector/matrix}
@@ -15,13 +15,13 @@ dpgmm_init(data, design, G, V, N, iter, init_iter)
 
 \item{V}{number of varieties/groups}
 
+\item{K}{maximum number of clusters}
+
 \item{N}{samples per variety/group}
 
 \item{iter}{number of iterations for main chain}
 
 \item{init_iter}{number of iterations for pilot chain}
-
-\item{K}{maximum number of clusters}
 }
 \description{
 Run MCMC for DPGMMM model, utilizing pilot chain
