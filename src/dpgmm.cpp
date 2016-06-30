@@ -250,7 +250,7 @@ extern "C" SEXP draw_zR(SEXP weights, SEXP G, SEXP K){
 }
 
   
-extern "C" SEXP cluster_sumR(SEXP k, SEXP xTy, SEXP G, SEXP V, SEXP n, SEXP z){
+extern "C" SEXP cluster_sumsR(SEXP k, SEXP xTy, SEXP G, SEXP V, SEXP n, SEXP z){
   int kk = INTEGER(k)[0];
   int GG = INTEGER(G)[0];
   int VV = INTEGER(V)[0];

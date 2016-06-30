@@ -23,6 +23,7 @@ void draw_theta(chain_t &chain){
     fvec beta_hat(V);
     fvec beta_raw(V);
     fvec chol_S(V*V);
+    fveci IGscalek = IGscale.begin() + k;
     
     //compute Gkk and xTyk
     cluster_sums(k, chain.xTy, G, V, N, chain.z, Gkk, xTyk);
@@ -70,7 +71,7 @@ void draw_theta(chain_t &chain){
       chain.beta[k*V + v] = beta_hat[v];
   
   // compute contribution from cluster K to IGscale
-  increment_IGscale(IGscale, chol_S, beta_hat);
+  increment_IGscale(IGscalek, xTyk, beta_hat, *Gkk, V);
 }
   //     Rprintf("IG:\n");
   //     Rprintf("%lf\n",*IGscale);
