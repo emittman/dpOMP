@@ -250,49 +250,36 @@ extern "C" SEXP draw_zR(SEXP weights, SEXP G, SEXP K){
 }
 
   
-extern "C" SEXP cluster_statsR(SEXP k, SEXP xTy, SEXP xTx, SEXP G, SEXP V, SEXP n, SEXP z){
+extern "C" SEXP cluster_sumR(SEXP k, SEXP xTy, SEXP G, SEXP V, SEXP n, SEXP z){
   int kk = INTEGER(k)[0];
   int GG = INTEGER(G)[0];
   int VV = INTEGER(V)[0];
   int nn = INTEGER(n)[0];
   int *z_ptr = INTEGER_POINTER(z);
   double *xTy_ptr = NUMERIC_POINTER(xTy);
-  double *xTx_ptr = NUMERIC_POINTER(xTx);
 
-  fvec xTx_c(xTx_ptr, xTx_ptr + VV*VV);  
   fvec xTy_c(xTy_ptr, xTy_ptr + GG*VV);
   uvec z_c(z_ptr, z_ptr + GG);
   fvec Gkk(1);
-  fvec beta_hat(VV);
-  fvec chol_S(VV*VV);
-  fvec IGscale(1);
-  cluster_stats(kk, xTy_c, xTx_c, GG, VV, nn, z_c, Gkk.begin(), beta_hat, chol_S, IGscale.begin());
+  fvec xTyk(VV);
+  cluster_sums(kk, xTy_c, GG, VV, nn, z_c, Gkk.begin(), xTyk);
   Rprintf("%d", z_c[0]);
   
-  SEXP result = Ralloc_List(4);
+  SEXP result = Ralloc_List(2);
   SEXP GkR = Ralloc_Real(1);
-  SEXP beta_hatR = Ralloc_Real(VV);
-  SEXP chol_SR = Ralloc_Real(VV*VV);
-  SEXP IGscaleR = Ralloc_Real(1);
+  SEXP xTykR = Ralloc_Real(VV);
   
   REAL(GkR)[0] = Gkk[0];
   
   for(int i=0; i<VV; i++){
-    REAL(beta_hatR)[i] = beta_hat[i];
+    REAL(xTykR)[i] = xTyk[i];
   }
-  for(int i=0; i<VV*VV; i++){
-    REAL(chol_SR)[i] = chol_S[i];
-  }
-  
-  REAL(IGscaleR)[0] = IGscale[0];
   
   SET_VECTOR_ELT(result, 0, GkR);
-  SET_VECTOR_ELT(result, 1, beta_hatR);
-  SET_VECTOR_ELT(result, 2, chol_SR);
-  SET_VECTOR_ELT(result, 3, IGscaleR);
+  SET_VECTOR_ELT(result, 1, xTykR);
   
   
-  UNPROTECT(5);
+  UNPROTECT(3);
   return result;
 }
   

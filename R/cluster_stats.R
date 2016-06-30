@@ -1,17 +1,16 @@
-#' Compute summary stats for groups
+#' Compute sums for groups
 #' 
 #' @param z group indicators
 #' @param K max number of groups
 #' 
 #' @export
-cluster_stats <- function(k, xTy, xTx, G, V, n, z){
-  .Call("cluster_statsR",
+cluster_sums <- function(k, xTy, G, V, N, z){
+  .Call("cluster_sumsR",
         as.integer(k),
         as.numeric(xTy),
-        as.numeric(xTx),
         as.integer(G),
         as.integer(V),
-        as.integer(n),
+        as.integer(N),
         as.integer(z),
         PACKAGE = "dpOMP")
 }
