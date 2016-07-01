@@ -8,7 +8,7 @@ rstar <- function(n, p1, p2, lambda1, lambda2){
 
 #V <- 2 
 G <- 500
-N <- 3
+N <- 10
 sigma2 <- .1
 
 beta_sim = rstar(G, 1, 1, 2, 2)
@@ -16,9 +16,10 @@ plot(beta_sim)
 
 beta <- apply(beta_sim, 1, identity)
 X <- diag(2) %x% rep(1, N)
-y <- matrix(rnorm(G*2*N, X%*%beta, sigma2), G, 2*N, byrow=T)
-
-out <- dpgmm(data=y, design=X, G, 2, 100, N, 10000)
+y <- matrix(rnorm(G*2*N, X%*%beta, sqrt(sigma2)), G, 2*N, byrow=T)
+bhat <- t(solve(t(X)%*%X) %*% t(X) %*% t(y))
+bhat <- data.frame(xout=bhat[,1], yout=bhat[,2])
+out <- dpgmm(data=y, design=X, G, 2, 100, N, 20000)
 hist(out$sigma2, 30)
 
 par(mfrow=c(4, 4))
@@ -31,5 +32,7 @@ library(ggplot2)
 b1 <- as.numeric(out$beta_g[1,,])
 b2 <- as.numeric(out$beta_g[2,,])
 b <- data.frame(xout=b1, yout=b2)
-ggplot(b, aes(xout, yout)) + geom_hex(bins=20) + geom_point(data=beta_sim) +
-  scale_fill_continuous(trans="log")
+ggplot(b, aes(xout, yout)) + geom_hex(bins=40) +
+  geom_point(data=beta_sim) +
+  geom_point(data=bhat, color="red")+
+  scale_fill_continuous(trans="log", low = "white", high = "blue")
