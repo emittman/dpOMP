@@ -26,4 +26,5 @@
 #include "draw_pi.h"
 #include "debug_print.h"
 #include "chain.h"
+#include "unit_testing.h"
 #endif //INCLUDES_H

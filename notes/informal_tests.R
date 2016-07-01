@@ -4,7 +4,7 @@ set.seed(6251148)
 
 G = 1
 V = 1
-K = 10
+K = 3
 N = 10
 
 d <- generate_data(X = diag(1), G=G, K=K, N=N)
@@ -89,6 +89,7 @@ Bhat <- data.frame(V1 = as.numeric(out$beta_g[1,,]), V2 = as.numeric(out$beta_g[
 Btrue <- data.frame(V1 = as.numeric(d$beta[1,]), V2 = as.numeric(d$beta[2,]))
 library(ggplot2)
 require(hexbin)
-ggplot(Bhat, aes(x=V1, y=V2)) + geom_hex(bins=50) + geom_point(data = Btrue, color="red")
+ggplot(Bhat, aes(x=V1, y=V2)) + geom_hex(bins=50) + geom_point(data = Btrue, color="red")+
+  scale_fill_continuous(trans="log")
 
 

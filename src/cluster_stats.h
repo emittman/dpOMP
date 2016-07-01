@@ -22,19 +22,19 @@ void get_k_indices(const uvec &z, fvec &indic, int k){
   std::transform(z.begin(), z.end(), indic.begin(), is_equal_to(k)); // pick out genes in group k
 }
 
-void construct_precision_mat(const fvec &xTx, fvec &chol_S, double Gk, double sigma2, double lambda2, int V, int n){
+void construct_precision_mat(const fvec &xTx, fvec &chol_S, double Gk, double sigma2, double lambda2, int V){
   
   std::transform(xTx.begin(), xTx.end(), chol_S.begin(), std::bind2nd(std::multiplies<double>(), Gk));
   for(int i=0; i<V; i++)
     chol_S[i*V+i] += sigma2/lambda2;
 }
 
-void increment_IGscale(fveci IGscale, fvec &xTyk, fvec &beta, double Gk, int V){
+void increment_IGscale(fveci IGscale, fvec &xTyk, fvec &xTx, fvec &beta, double Gk, int V){
   
   double out = 0.0;
   if(Gk != 0) {
-    out = inner_prod_vec(V, &(xTyk[0]), &(beta[0]));
-    out -= Gk * inner_prod_vec(V, &(beta[0]), &(beta[0]));
+    out = 2.0 * inner_prod_vec(V, &(xTyk[0]), &(beta[0]));
+    out = out - Gk * quad_form(V, &(beta[0]), &(xTx[0]));
   }
   
   *IGscale = out;

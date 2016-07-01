@@ -17,7 +17,7 @@ void draw_theta(chain_t &chain){
   //private k?  
   #pragma omp parallel for
   for(int k = 0; k<K; k++){
-    
+    // Rprintf("cluster %d:",k);
     fveci Gkk = chain.Gk.begin() + k;
     fvec xTyk(V);
     fvec beta_hat(V);
@@ -28,15 +28,14 @@ void draw_theta(chain_t &chain){
     //compute Gkk and xTyk
     cluster_sums(k, chain.xTy, G, V, N, chain.z, Gkk, xTyk);
     
-    //     Rprintf("xTy:\n");
-    //     print_mat(xTy, G, V);
-    
-    //     Rprintf("indices:\n");
-    //     print_mat(indic, 1, G);
+//         Rprintf("xTyk:\n");
+//         print_mat(xTyk, 1, V);
+//     
+//         Rprintf("Gk:%.0lf\n", *Gkk);
     
     // S_inv = (X^T * X + sigma2/lambda2 * I)
     // at this point, lambda2 == 1.0
-    construct_precision_mat(chain.xTx, chol_S, *Gkk, chain.sigma2, 1.0, V, N);
+    construct_precision_mat(chain.xTx, chol_S, *Gkk, chain.sigma2, 1.0, V);
     //     Rprintf("prec:\n");
     //     print_mat(chol_S, V, V);
     //
@@ -71,10 +70,11 @@ void draw_theta(chain_t &chain){
       chain.beta[k*V + v] = beta_hat[v];
   
   // compute contribution from cluster K to IGscale
-  increment_IGscale(IGscalek, xTyk, beta_hat, *Gkk, V);
+  increment_IGscale(IGscalek, xTyk, chain.xTx, beta_hat, *Gkk, V);
 }
-  //     Rprintf("IG:\n");
-  //     Rprintf("%lf\n",*IGscale);
+//       Rprintf("IG:\n");
+//       Rprintf("%lf\n",*IGscale);
+//   Rprintf("yTy is: %lf\n", chain.yTy);
 //   Rprintf("compnents of IGscale:\n");
 //   print_mat(IGscale, 1, K);
   double scale = std::accumulate(IGscale.begin(), IGscale.end(), 0.0);
