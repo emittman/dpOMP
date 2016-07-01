@@ -19,7 +19,11 @@ X <- diag(2) %x% rep(1, N)
 y <- matrix(rnorm(G*2*N, X%*%beta, sqrt(sigma2)), G, 2*N, byrow=T)
 bhat <- t(solve(t(X)%*%X) %*% t(X) %*% t(y))
 bhat <- data.frame(xout=bhat[,1], yout=bhat[,2])
-out <- dpgmm(data=y, design=X, G, 2, 100, N, 20000)
+
+lambda2 <- 1
+alpha <- 10
+
+out <- dpgmm_init(data=y, design=X, lambda2=lambda2, alpha=alpha, G=G, V=2, K=100, N=N, iter=20000, init_iter=1000)
 hist(out$sigma2, 30)
 
 par(mfrow=c(4, 4))

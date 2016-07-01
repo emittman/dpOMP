@@ -4,12 +4,16 @@
 \alias{dpgmm}
 \title{Do MCMC for dpgmm model}
 \usage{
-dpgmm(data, design, G, V, K, N, iter)
+dpgmm(data, design, lambda2, alpha, G, V, K, N, iter)
 }
 \arguments{
 \item{data}{A column-major $\eqn{G \cdot VN}$ gene expressionvector/matrix}
 
 \item{design}{A column-major $\eqn{V \cdot V}$ experimental design vector/matrix}
+
+\item{lambda2}{prior variance for base measure}
+
+\item{alpha}{DP concentration parameter}
 
 \item{G}{number of genes}
 

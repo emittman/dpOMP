@@ -4,7 +4,8 @@
 #define Ralloc_Int(len)   PROTECT(allocVector(INTSXP, (len)))
 #define Ralloc_List(len)  PROTECT(allocVector(VECSXP, (len)))
 
-extern "C" SEXP dpgmm_initR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP betaR, SEXP piR, SEXP sigma2R, SEXP G, SEXP V, SEXP K, SEXP N, SEXP iter){
+extern "C" SEXP dpgmm_initR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP betaR, SEXP piR,
+                           SEXP sigma2R, SEXP lambda2R, SEXP alphaR, SEXP G, SEXP V, SEXP K, SEXP N, SEXP iter){
   int GG, KK, NN, VV, beta_len, I;
   GG = INTEGER(G)[0];
   KK = INTEGER(K)[0];
@@ -13,14 +14,16 @@ extern "C" SEXP dpgmm_initR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP betaR, SEXP pi
   I = INTEGER(iter)[0];
   beta_len = KK*VV;
   
-  double yTy, *xTy_p, *xTx_p, *beta_p, *pi_p;
+  double yTy, *xTy_p, *xTx_p, *beta_p, *pi_p, lambda2, alpha;
   yTy = REAL(yTyR)[0];
   xTy_p = NUMERIC_POINTER(xTyR);
   xTx_p = NUMERIC_POINTER(xTxR);
   beta_p = NUMERIC_POINTER(betaR);
   pi_p = NUMERIC_POINTER(piR);
+  lambda2 = REAL(lambda2R)[0];
+  alpha = REAL(alphaR)[0];
 
-  chain_t chain = construct_chain(&yTy, xTy_p, xTx_p, GG, KK, VV, NN);
+  chain_t chain = construct_chain(&yTy, xTy_p, xTx_p, lambda2, alpha, GG, KK, VV, NN);
   
   //initialize_chain(chain);
   std::copy(beta_p, beta_p + beta_len, chain.beta.begin());
@@ -42,7 +45,7 @@ extern "C" SEXP dpgmm_initR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP betaR, SEXP pi
     // print_mat(weights, GG, KK);
     // print_mat(z, 1, GG);
     draw_theta(chain);
-    draw_pi(chain, 1.0); //second arg is alpha of DP(alpha P_0) fame
+    draw_pi(chain, chain.alpha); //second arg is alpha of DP(alpha P_0) fame
     // Rprintf("iter %d: sigma2 = %lf\n", i, chain.sigma2);
     
     int offset = i*beta_len;
@@ -70,7 +73,7 @@ extern "C" SEXP dpgmm_initR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP betaR, SEXP pi
   return list_out;
 }
 
-extern "C" SEXP dpgmmR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP G, SEXP V, SEXP K, SEXP N, SEXP iter){
+extern "C" SEXP dpgmmR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP lambda2R, SEXP alphaR, SEXP G, SEXP V, SEXP K, SEXP N, SEXP iter){
   int GG, KK, NN, VV, beta_len, I;
   GG = INTEGER(G)[0];
   KK = INTEGER(K)[0];
@@ -79,12 +82,14 @@ extern "C" SEXP dpgmmR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP G, SEXP V, SEXP K, 
   I = INTEGER(iter)[0];
   beta_len = KK*VV;
 
-  double yTy, *xTy_p, *xTx_p;
+  double yTy, *xTy_p, *xTx_p, lambda2, alpha;
   yTy = REAL(yTyR)[0];
   xTy_p = NUMERIC_POINTER(xTyR);
   xTx_p = NUMERIC_POINTER(xTxR);
+  lambda2 = REAL(lambda2R)[0];
+  alpha = REAL(alphaR)[0];
   
-  chain_t chain = construct_chain(&yTy, xTy_p, xTx_p, GG, KK, VV, NN);
+  chain_t chain = construct_chain(&yTy, xTy_p, xTx_p, lambda2, alpha, GG, KK, VV, NN);
   
   initialize_chain(chain);
   
@@ -158,7 +163,7 @@ extern "C" SEXP compute_weightsR(SEXP xTy, SEXP xTx, SEXP beta, SEXP pi, SEXP si
   double yTy = 1.0; //arbitrary
   xTy_p  = NUMERIC_POINTER(xTy);
   xTx_p  = NUMERIC_POINTER(xTx);
-  chain_t chain = construct_chain(&yTy, xTy_p, xTx_p, GG, KK, VV, NN);
+  chain_t chain = construct_chain(&yTy, xTy_p, xTx_p, 1, 1, GG, KK, VV, NN);
   
   beta_p = NUMERIC_POINTER(beta);
   pi_p   = NUMERIC_POINTER(pi);
@@ -235,7 +240,7 @@ extern "C" SEXP draw_zR(SEXP weights, SEXP G, SEXP K){
   double yTy = 0;
   fvec xTy(GG);
   fvec xTx(1);
-  chain_t chain = construct_chain(&yTy, &(xTy[0]), &(xTx[0]), GG, KK, 1, 1);
+  chain_t chain = construct_chain(&yTy, &(xTy[0]), &(xTx[0]), 1, 1, GG, KK, 1, 1);
   std::copy(weight_ptr, weight_ptr + GG*KK, chain.weights.begin());
 
   GetRNGstate();
@@ -377,7 +382,7 @@ extern "C" SEXP draw_piR(SEXP GK, SEXP K){
   double yTy = 0;
   fvec xTy(1);
   fvec xTx(1);
-  chain_t chain = construct_chain(&yTy, &(xTy[0]), &(xTx[0]), 1, KK, 1, 1);
+  chain_t chain = construct_chain(&yTy, &(xTy[0]), &(xTx[0]), 1, 1, 1, KK, 1, 1);
   std::copy(Gk_ptr, Gk_ptr + KK, chain.Gk.begin());
   GetRNGstate();
   draw_pi(chain, 1.0);
@@ -399,9 +404,10 @@ extern "C" SEXP draw_thetaR(SEXP z, SEXP yTy, SEXP xTy, SEXP xTx, SEXP G, SEXP K
   double yTyC = REAL(yTy)[0];
   double *xTy_p = NUMERIC_POINTER(xTy);
   double *xTx_p = NUMERIC_POINTER(xTx);
-  chain_t chain = construct_chain(&yTyC, xTy_p, xTx_p, GG, KK, VV, NN);
+  // assume that lambda2 = 1.0
+  chain_t chain = construct_chain(&yTyC, xTy_p, xTx_p, 1.0, 1.0, GG, KK, VV, NN);
   std::copy(z_p, z_p+GG, chain.z.begin());
-  chain.sigma2 = 1.0;  
+  chain.sigma2 = 1.0;
 
   GetRNGstate();
   draw_theta(chain);
@@ -435,7 +441,7 @@ extern "C" SEXP linear_comb_vecR(SEXP n, SEXP alpha, SEXP x, SEXP y){
   return yout;
 }
 
-extern "C" SEXP send_chain(SEXP yTy, SEXP xTy, SEXP xTx, SEXP G, SEXP K, SEXP V, SEXP N){
+extern "C" SEXP send_chain(SEXP yTy, SEXP xTy, SEXP xTx, SEXP lambda2R, SEXP alphaR, SEXP G, SEXP K, SEXP V, SEXP N){
   int GG = INTEGER(G)[0];
   int KK = INTEGER(K)[0];
   int VV = INTEGER(V)[0];
@@ -443,7 +449,9 @@ extern "C" SEXP send_chain(SEXP yTy, SEXP xTy, SEXP xTx, SEXP G, SEXP K, SEXP V,
   double *yTy_p = NUMERIC_POINTER(yTy);
   double *xTy_p = NUMERIC_POINTER(xTy);
   double *xTx_p = NUMERIC_POINTER(xTx);
-  chain_t chain = construct_chain(yTy_p, xTy_p, xTx_p, GG, KK, VV, NN);
+  double lambda2 = REAL(lambda2R)[0];
+  double alpha = REAL(alphaR)[0];
+  chain_t chain = construct_chain(yTy_p, xTy_p, xTx_p, lambda2, alpha, GG, KK, VV, NN);
   initialize_chain(chain);
   print_chain_state(chain);
   SEXP out = Ralloc_Int(1);

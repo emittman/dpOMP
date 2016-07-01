@@ -34,8 +34,7 @@ void draw_theta(chain_t &chain){
 //         Rprintf("Gk:%.0lf\n", *Gkk);
     
     // S_inv = (X^T * X + sigma2/lambda2 * I)
-    // at this point, lambda2 == 1.0
-    construct_precision_mat(chain.xTx, chol_S, *Gkk, chain.sigma2, 1.0, V);
+    construct_precision_mat(chain.xTx, chol_S, *Gkk, chain.sigma2, chain.lambda2, V);
     //     Rprintf("prec:\n");
     //     print_mat(chol_S, V, V);
     //

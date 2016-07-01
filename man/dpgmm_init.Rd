@@ -4,12 +4,16 @@
 \alias{dpgmm_init}
 \title{Run MCMC for DPGMMM model, utilizing pilot chain}
 \usage{
-dpgmm_init(data, design, G, V, K, N, iter, init_iter)
+dpgmm_init(data, design, lambda2, alpha, G, V, K, N, iter, init_iter)
 }
 \arguments{
 \item{data}{A column-major $\eqn{G \cdot VN}$ gene expressionvector/matrix}
 
 \item{design}{A column-major $\eqn{V \cdot V}$ experimental design vector/matrix}
+
+\item{lambda2}{prior variance for base measure}
+
+\item{alpha}{DP concentration parameter}
 
 \item{G}{number of genes}
 
