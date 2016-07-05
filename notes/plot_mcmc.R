@@ -1,7 +1,7 @@
 # Functions for summaries and plots
 
 #is this actually posterior predictive?
-make_ppplot_for_P_d1 <- function(mcmc, dims, names, bins=30, plotfilename){
+make_ppplot_for_P <- function(mcmc, dims, names, bins=30, plotfilename){
   #mcmc$beta_g is V by K by n_iter array
   len = length(dims)
   if(len != length(names))
