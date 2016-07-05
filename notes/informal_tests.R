@@ -79,7 +79,7 @@ out <- dpgmm_init(d$y, d$X, 6.25, 10, G, V, modelK, N, iter=10000, init_iter=100
 # hist(max_index, breaks = 1:100+.5)
 
 #saveRDS(out, file="samples_wo_inits.rds")
-saveRDS(out, file = paste0(c(sim, "/samples_with_inits.rds"), collapse = ""))
+saveRDS(out, file = paste0(c(sim, "/samples.rds"), collapse = ""))
 
 ####
 # G = 1000
