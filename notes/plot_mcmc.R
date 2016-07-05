@@ -1,15 +1,34 @@
 # Functions for summaries and plots
 
 #is this actually posterior predictive?
-make_ppplot_for_P <- function(mcmc, dim1, dim2, name1, name2, bins, plotfilename){
+make_ppplot_for_P_d1 <- function(mcmc, dims, names, bins=30, plotfilename){
   #mcmc$beta_g is V by K by n_iter array
-  require(ggplot2)
-  require(hexbin)
-  plot.df <- data.frame(x1 = mcmc$beta_g[dim1, , ], x2 = mcmc$beta_g[dim2, , ])
-  p <- ggplot(plot.df, aes(x=x1, y=x2)) + geom_hex(bins=bins) +
-    xlab(name1) + ylab(name2) +
-    scale_fill_continuous(trans="log")
-  print(p)
-  ggsave(paste0(c(plotfilename, ".pdf"), collapse=""))
+  len = length(dims)
+  if(len != length(names))
+    error("Length of dims much match length of names")
+  
+  if(len < 1)
+    error("dims must be at least 1")
+    
+  if(len == 1){
+    plot.df <- data.frame(x1 = as.numeric(mcmc$beta_g))
+    p <- ggplot(plot.df, aes(x=x1)) + geom_histogram(bins=bins) +
+      xlab(name1)
+    print(p)
+    ggsave(paste0(c(plotfilename, ".pdf"), collapse=""))
+  }
+  
+  if(len > 1){
+    dims <- dims[1:2]
+    names <- names[1:2]
+    require(ggplot2)
+    require(hexbin)
+    plot.df <- data.frame(x1 = as.numeric(mcmc$beta_g[dim1, , ]), x2 = as.numeric(mcmc$beta_g[dim2, , ]))
+    p <- ggplot(plot.df, aes(x=x1, y=x2)) + geom_hex(bins=bins) +
+      xlab(name1) + ylab(name2) +
+      scale_fill_continuous(trans="log")
+    print(p)
+    ggsave(paste0(c(plotfilename, ".pdf"), collapse=""))
+  }
 }
 
