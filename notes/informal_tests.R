@@ -1,6 +1,10 @@
 library(dpOMP)
 
 set.seed(6251148)
+sim <- "july05_1d"
+
+dir.create(sim)
+
 
 # G = 1
 # V = 1
@@ -34,46 +38,48 @@ modelK = 1000
 trueK = 100
 N = 9
 d <- generate_data(X = diag(V), G=G, K=trueK, N=N)
-d$z
+
+saveRDS(d, file=paste0(c(sim,"/data.rds"), collapse=""))
+
 # out <- dpgmm(d$y, d$X, G, V, modelK, N, iter=10000)
 out <- dpgmm_init(d$y, d$X, 6.25, 10, G, V, modelK, N, iter=10000, init_iter=1000)
 
 #identification of true locations
-dens = density(out$beta_g)
-plot(dens)
-abline(v=d$beta, lty=2)
-
-# shrinkage
-data_means = rowMeans(d$y)
-post_means = rowMeans(out$beta_g[,,])
-plot(data_means, post_means)
-abline(0,1, col='red')
-
-#correct pooling of information
-hist(out$beta_g[,d$z==1,], prob=T, 30, main="correct pooling of information")
-Gk = sum(d$z==1)
-curve(dnorm(x, sum(d$xTy[d$z==1])/(Gk*N + 1), sd(d$y[d$z==2,])/sqrt(Gk*N + 1)), add=T, lty=2)
-abline(v = mean(out$beta_g[,d$z==1,]))
-
-#shrinkage?
-opar = par(mfrow=c(4,4))
-genes = sort(sample(G,16,replace=FALSE))
-for (g in genes) {
-hist(out$beta_g[,g,], prob=T, 30, main=paste("Gene=",g))
-curve(dnorm(x, sum(d$xTy[g])/(N+1), sd(d$y[g,])/sqrt(N + 1)), add=T, lty=2)
-abline(v = d$beta[d$z[g]])
-}
-
-#number of occupied clusters
-occupied <- sapply(1:10000, function(i) sum(out$beta[1,,i] %in% out$beta_g[1,,i]))
-hist(occupied, breaks = 1:100+.5)
-
-#maximum index of significant pi
-max_index <- sapply(1:10000, function(i) max(which(out$beta[1,,i] %in% out$beta_g[1,,i])))
-hist(max_index, breaks = 1:100+.5)
+# dens = density(out$beta_g)
+# plot(dens)
+# abline(v=d$beta, lty=2)
+# 
+# # shrinkage
+# data_means = rowMeans(d$y)
+# post_means = rowMeans(out$beta_g[,,])
+# plot(data_means, post_means)
+# abline(0,1, col='red')
+# 
+# #correct pooling of information
+# hist(out$beta_g[,d$z==1,], prob=T, 30, main="correct pooling of information")
+# Gk = sum(d$z==1)
+# curve(dnorm(x, sum(d$xTy[d$z==1])/(Gk*N + 1), sd(d$y[d$z==2,])/sqrt(Gk*N + 1)), add=T, lty=2)
+# abline(v = mean(out$beta_g[,d$z==1,]))
+# 
+# #shrinkage?
+# opar = par(mfrow=c(4,4))
+# genes = sort(sample(G,16,replace=FALSE))
+# for (g in genes) {
+# hist(out$beta_g[,g,], prob=T, 30, main=paste("Gene=",g))
+# curve(dnorm(x, sum(d$xTy[g])/(N+1), sd(d$y[g,])/sqrt(N + 1)), add=T, lty=2)
+# abline(v = d$beta[d$z[g]])
+# }
+# 
+# #number of occupied clusters
+# occupied <- sapply(1:10000, function(i) sum(out$beta[1,,i] %in% out$beta_g[1,,i]))
+# hist(occupied, breaks = 1:100+.5)
+# 
+# #maximum index of significant pi
+# max_index <- sapply(1:10000, function(i) max(which(out$beta[1,,i] %in% out$beta_g[1,,i])))
+# hist(max_index, breaks = 1:100+.5)
 
 #saveRDS(out, file="samples_wo_inits.rds")
-saveRDS(out, file="samples_with_inits.rds")
+saveRDS(out, file = paste0(c(sim, "/samples_with_inits.rds"), collapse = ""))
 
 ####
 # G = 1000
