@@ -14,7 +14,7 @@ make_ppplot_for_P <- function(mcmc, dims, names, bins=30, plotfilename){
   if(len == 1){
     plot.df <- data.frame(x1 = as.numeric(mcmc$beta_g))
     p <- ggplot(plot.df, aes(x=x1)) + geom_histogram(bins=bins) +
-      xlab(name1)
+      xlab(names)
     print(p)
     ggsave(paste0(c(plotfilename, ".pdf"), collapse=""))
   }
@@ -23,9 +23,9 @@ make_ppplot_for_P <- function(mcmc, dims, names, bins=30, plotfilename){
     dims <- dims[1:2]
     names <- names[1:2]
     require(hexbin)
-    plot.df <- data.frame(x1 = as.numeric(mcmc$beta_g[dim1, , ]), x2 = as.numeric(mcmc$beta_g[dim2, , ]))
+    plot.df <- data.frame(x1 = as.numeric(mcmc$beta_g[dim[1], , ]), x2 = as.numeric(mcmc$beta_g[dim[2], , ]))
     p <- ggplot(plot.df, aes(x=x1, y=x2)) + geom_hex(bins=bins) +
-      xlab(name1) + ylab(name2) +
+      xlab(names[1]) + ylab(names[2]) +
       scale_fill_continuous(trans="log")
     print(p)
     ggsave(paste0(c(plotfilename, ".pdf"), collapse=""))
