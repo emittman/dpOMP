@@ -2,6 +2,7 @@
 
 #is this actually posterior predictive?
 make_ppplot_for_P <- function(mcmc, dims, names, bins=30, plotfilename){
+  require(ggplot2)
   #mcmc$beta_g is V by K by n_iter array
   len = length(dims)
   if(len != length(names))
@@ -21,7 +22,6 @@ make_ppplot_for_P <- function(mcmc, dims, names, bins=30, plotfilename){
   if(len > 1){
     dims <- dims[1:2]
     names <- names[1:2]
-    require(ggplot2)
     require(hexbin)
     plot.df <- data.frame(x1 = as.numeric(mcmc$beta_g[dim1, , ]), x2 = as.numeric(mcmc$beta_g[dim2, , ]))
     p <- ggplot(plot.df, aes(x=x1, y=x2)) + geom_hex(bins=bins) +
