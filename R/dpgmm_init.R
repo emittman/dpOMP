@@ -20,28 +20,14 @@ dpgmm_init <- function(data, design, lambda2, alpha, G, V, K, N, iter, init_iter
   xTy <- t(design) %*% t(data)
   xTx <- crossprod(design)
   
-  init_out <- .Call("dpgmmR",
-               as.numeric(yTy),
-               as.numeric(xTy),
-               as.numeric(xTx),
-               as.numeric(lambda2),
-               as.numeric(alpha),
-               as.integer(G),
-               as.integer(V),
-               as.integer(K),
-               as.integer(N),
-               as.integer(init_iter),
-               PACKAGE = "dpOMP")
-  names(init_out) <- c("beta", "pi", "beta_g", "sigma2")
-  init_out$beta <- array(init_out$beta, dim=c(V, K, iter))
-  init_out$pi <- array(init_out$pi, dim=c(K, iter))
-  init_out$beta_g <- array(init_out$beta_g, dim=c(V, G, iter))
+  init_out <- dpgmm(data, design, lambda2, alpha, G, V, K, N, init_iter)
+  
   init <- list()
   # move most relevant atoms to front of vector
   indices <- which(init_out$beta[1,,init_iter] %in% init_out$beta_g[1,,init_iter])
   anti_indices <- (1:K)[!(1:K %in% indices)]
   indices <- indices[order(-init_out$pi[indices,init_iter])]
-  init$beta <- init_out$beta_g[,c(indices, anti_indices),init_iter]
+  init$beta <- init_out$beta[,c(indices, anti_indices),init_iter]
   init$pi <- init_out$pi[c(indices, anti_indices),init_iter]
   init$sigma2 <- init_out$sigma2[init_iter]
   

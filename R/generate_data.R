@@ -13,7 +13,7 @@ generate_data <- function(X, N, G, K, beta=NULL, pi=NULL){
   if(!is.null(pi)){
     if(length(pi) != K) stop("pi must have dimension K")
   } else{
-    pi <- MCMCpack::rdirichlet(rep(1, K), 1) 
+    pi <- MCMCpack::rdirichlet(1, rep(1, K)) 
   }
   Xexpand <- matrix(rep(X, each=N), V*N, V)
   groupMeans <- Xexpand %*% beta

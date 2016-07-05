@@ -1,9 +1,4 @@
-library(dpOMP)
 
-set.seed(6251148)
-sim <- "july05_1d"
-
-dir.create(sim)
 
 
 # G = 1
@@ -31,18 +26,46 @@ dir.create(sim)
 # row.names(prop_tbl) <- c("actual","expected","difference")
 # prop_tbl
 
-####
+#### one-dimensional
+library(dpOMP)
+
+set.seed(6251148)
+sim <- "july05_1d"
+
+dir.create(sim)
+
 G = 10000
 V = 1
 modelK = 1000
 trueK = 100
-N = 9
+N = 8
 d <- generate_data(X = diag(V), G=G, K=trueK, N=N)
 
 saveRDS(d, file=paste0(c(sim,"/data.rds"), collapse=""))
 
 # out <- dpgmm(d$y, d$X, G, V, modelK, N, iter=10000)
 out <- dpgmm_init(d$y, d$X, 6.25, 10, G, V, modelK, N, iter=10000, init_iter=1000)
+saveRDS(out, file = paste0(c(sim, "/samples.rds"), collapse = ""))
+
+
+#### two-dimensional
+set.seed(7052016)
+sim <- "july05_2d"
+
+dir.create(sim)
+
+G=10000
+V=2
+modelK = 1000
+trueK = 100
+N = 8
+d <- generate_data(X = diag(V), G=G, K=trueK, N=N)
+
+saveRDS(d, file = paste0(c(sim, "data.rds"), collapse=""))
+
+out <- dpgmm_init(d$y, d$X, 6.25, 10, G, V, modelK, N, iter=10000, init_iter=1000)
+saveRDS(out, file=paste0(c(sim, "/samples.rds"), collapse= ""))
+
 
 #identification of true locations
 # dens = density(out$beta_g)
@@ -79,7 +102,6 @@ out <- dpgmm_init(d$y, d$X, 6.25, 10, G, V, modelK, N, iter=10000, init_iter=100
 # hist(max_index, breaks = 1:100+.5)
 
 #saveRDS(out, file="samples_wo_inits.rds")
-saveRDS(out, file = paste0(c(sim, "/samples.rds"), collapse = ""))
 
 ####
 # G = 1000
