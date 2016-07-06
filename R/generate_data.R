@@ -1,5 +1,12 @@
 #' generates a data set from the model
 #' 
+#' @param X V by V numeric design matrix
+#' @param N number of replicates per variety
+#' @param G number of genes
+#' @param K number of clusters
+#' @param beta V by K matrix of location parameters
+#' @param pi K-vector of cluster weights
+#' 
 #' @export
 
 generate_data <- function(X, N, G, K, beta=NULL, pi=NULL){

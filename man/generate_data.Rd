@@ -6,6 +6,19 @@
 \usage{
 generate_data(X, N, G, K, beta = NULL, pi = NULL)
 }
+\arguments{
+\item{X}{V by V numeric design matrix}
+
+\item{N}{number of replicates per variety}
+
+\item{G}{number of genes}
+
+\item{K}{number of clusters}
+
+\item{beta}{V by K matrix of location parameters}
+
+\item{pi}{K-vector of cluster weights}
+}
 \description{
 generates a data set from the model
 }
