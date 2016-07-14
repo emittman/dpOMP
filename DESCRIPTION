@@ -1,7 +1,7 @@
 Package: dpOMP
 Type: Package
-Title: Uses OpenMP for stuff
-Version: 0.1
+Title: Fit DPGMM model to gene expression data
+Version: 0.0
 Date: 2016-05-26
 Author: Eric Mittman
 Maintainer: Eric Mittman <emittman@iastate.edu>
@@ -9,5 +9,5 @@ Description: More about what it does (maybe more than one line)
 License: What license is it under?
 RoxygenNote: 5.0.1
 Suggests:
-    MCMCpack
+    MCMCpack, mvtnorm, plyr
     

@@ -29,12 +29,13 @@ void construct_precision_mat(const fvec &xTx, fvec &chol_S, double Gk, double si
     chol_S[i*V+i] += sigma2/lambda2;
 }
 
-void increment_IGscale(fveci IGscale, fvec &xTyk, fvec &xTx, fvec &beta, double Gk, int V){
+void calculate_IGscale(double *IGscale, double yTyk, fvec &xTyk, fvec &xTx, fvec &beta, double Gk, int V){
   
   double out = 0.0;
   if(Gk != 0) {
-    out = 2.0 * inner_prod_vec(V, &(xTyk[0]), &(beta[0]));
-    out = out - Gk * quad_form(V, &(beta[0]), &(xTx[0]));
+    out = yTyk;
+    out = out - 2.0 * inner_prod_vec(V, &(xTyk[0]), &(beta[0]));
+    out = out + Gk * quad_form(V, &(beta[0]), &(xTx[0]));
   }
   
   *IGscale = out;
@@ -46,11 +47,12 @@ double get_cluster_size(fvec &indices){
   return result;
 }
 
-void cluster_sums(int k, fvec &xTy, int G, int V, int n, const uvec &z, fveci Gkk, fvec &xTyk){
+void cluster_sums(int k, fvec &yTy, fvec &xTy, int G, int V, const uvec &z, fveci Gkk, double *yTyk, fvec &xTyk){
   
     fvec indic(G);
     get_k_indices(z, indic, k);
     *Gkk = get_cluster_size(indic);
+    *yTyk = inner_prod_vec(G, &(indic[0]), &(yTy[0]));
     // sum xTy for g: z_g==k, last arg means trans = "F"    
     multiply_mat_vec(V, G, xTy, indic, xTyk, 0); 
     //     Rprintf("xTyk:\n");

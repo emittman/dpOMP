@@ -4,7 +4,7 @@
 \alias{dpgmm_init}
 \title{Run MCMC for DPGMMM model, utilizing pilot chain}
 \usage{
-dpgmm_init(data, design, lambda2, alpha, G, V, K, N, iter, init_iter)
+dpgmm_init(data, design, lambda2, alpha, a, b, G, V, K, N, iter, init_iter)
 }
 \arguments{
 \item{data}{A column-major $\eqn{G \cdot VN}$ gene expressionvector/matrix}

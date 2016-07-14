@@ -2,16 +2,24 @@
 % Please edit documentation in R/cluster_stats.R
 \name{cluster_sums}
 \alias{cluster_sums}
-\title{Compute sums for groups}
+\title{Compute sums for a group}
 \usage{
-cluster_sums(k, xTy, G, V, N, z)
+cluster_sums(k, yTy, xTy, G, V, z)
 }
 \arguments{
-\item{z}{group indicators}
+\item{k}{which group (zero indexed)}
 
-\item{K}{max number of groups}
+\item{yTy}{numeric vector length G}
+
+\item{xTy}{numeric matrix V by G}
+
+\item{G}{integer}
+
+\item{V}{integer}
+
+\item{z}{group indicators}
 }
 \description{
-Compute sums for groups
+Compute sums for a group
 }
 

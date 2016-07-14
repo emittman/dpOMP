@@ -8,16 +8,21 @@
  * Advice on subsetting from http://stackoverflow.com/questions/421573/best-way-to-extract-a-subvector-from-a-vector
  */
 void compute_weights(chain_t &chain){
+  int G = chain.G;
+  int K = chain.K;
+  int V = chain.V;
 #pragma omp parallel for
-  for(int g=0; g<chain.G; g++){
+  for(int g=0; g<G; g++){
     
-    double *xTy_g_ptr = &(chain.xTy[chain.V*g]);
+    double yTy_g = chain.yTy[g];
+    double *xTy_g_ptr = &(chain.xTy[V*g]);
 
-    for(int k=0; k<chain.K; k++) {
+    for(int k=0; k<K; k++) {
 
-      double *beta_k_ptr = &(chain.beta[chain.V*k]);
+      double *beta_k_ptr = &(chain.beta[V*k]);
       double pi_k = chain.pi[k];
-      chain.weights[g*chain.K + k] = pi_prime(xTy_g_ptr, chain.xTx, beta_k_ptr, pi_k, chain.sigma2, chain.V);
+      double sigma2_k = chain.sigma2[k];
+      chain.weights[g*K + k] = pi_prime(yTy_g, xTy_g_ptr, chain.xTx, beta_k_ptr, pi_k, sigma2_k, V);
 
     }
   }

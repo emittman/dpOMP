@@ -29,19 +29,20 @@ extern "C"{
     return out;
   }
   
-  SEXP increment_IGscaleR( SEXP xTy, SEXP xTx, SEXP beta, SEXP Gk, SEXP V){
-    double *xTy_p = NUMERIC_POINTER(xTy),
+  SEXP calculate_IGscaleR( SEXP yTy, SEXP xTy, SEXP xTx, SEXP beta, SEXP Gk, SEXP V){
+    double yTyk = REAL(yTy)[0],
+           *xTy_p = NUMERIC_POINTER(xTy),
            *xTx_p = NUMERIC_POINTER(xTx),
            *beta_p = NUMERIC_POINTER(beta),
            GkC = REAL(Gk)[0];
     int VV = INTEGER(V)[0];
-    fvec IGscale(1);
+    double IGscale;
     fvec xTyk(xTy_p, xTy_p + VV);
     fvec xTxC(xTx_p, xTx_p + VV*VV);
     fvec betak(beta_p, beta_p + VV);
-    increment_IGscale(IGscale.begin(), xTyk, xTxC, betak, GkC, VV);
+    calculate_IGscale(&IGscale, yTyk, xTyk, xTxC, betak, GkC, VV);
     SEXP out = Ralloc_Real(1);
-    REAL(out)[0] = IGscale[0];
+    REAL(out)[0] = IGscale;
     UNPROTECT(1);
     return out;
   }

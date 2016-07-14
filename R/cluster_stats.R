@@ -1,16 +1,20 @@
-#' Compute sums for groups
+#' Compute sums for a group
 #' 
+#' @param k which group (zero indexed)
+#' @param yTy numeric vector length G
+#' @param xTy numeric matrix V by G
+#' @param G integer
+#' @param V integer
 #' @param z group indicators
-#' @param K max number of groups
 #' 
 #' @export
-cluster_sums <- function(k, xTy, G, V, N, z){
+cluster_sums <- function(k, yTy, xTy, G, V, z){
   .Call("cluster_sumsR",
         as.integer(k),
+        as.numeric(yTy),
         as.numeric(xTy),
         as.integer(G),
         as.integer(V),
-        as.integer(N),
         as.integer(z),
         PACKAGE = "dpOMP")
 }
@@ -35,13 +39,15 @@ construct_precision_mat <- function(xTx, Gk, sigma2, lambda2, V){
 
 #' Calculate cluster contribution to IG scale paramter of full conditional for sigma2
 #' 
-#' @param xTyk Crossproduct of data associated with cluster k and design matrix
-#' @param xTx Crossproduct of design matrix
-#' @param betak Current value of beta parameter for cluster k
-#' @param Gk Number of genes associated with cluster k
+#' @param yTyk squared norm of data associated with cluster k
+#' @param xTyk crossproduct of data associated with cluster k and design matrix
+#' @param xTx  crossproduct of design matrix
+#' @param betak current value of beta parameter for cluster k
+#' @param Gk number of genes associated with cluster k
 #' @export
-increment_IGscale <- function(xTyk, xTx, betak, Gk){
-  out <- .Call("increment_IGscaleR",
+calculate_IGscale <- function(yTyk, xTyk, xTx, betak, Gk){
+  out <- .Call("calculate_IGscaleR",
+               as.numeric(yTyk),
                as.numeric(xTyk),
                as.numeric(xTx),
                as.numeric(betak),

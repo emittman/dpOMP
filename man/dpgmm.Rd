@@ -4,7 +4,7 @@
 \alias{dpgmm}
 \title{Do MCMC for dpgmm model}
 \usage{
-dpgmm(data, design, lambda2, alpha, G, V, K, N, iter)
+dpgmm(data, design, lambda2, alpha, a, b, G, V, K, N, iter)
 }
 \arguments{
 \item{data}{A column-major $\eqn{G \cdot VN}$ gene expressionvector/matrix}

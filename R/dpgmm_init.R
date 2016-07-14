@@ -13,23 +13,23 @@
 #' 
 #' @export
 
-dpgmm_init <- function(data, design, lambda2, alpha, G, V, K, N, iter, init_iter){
+dpgmm_init <- function(data, design, lambda2, alpha, a, b,  G, V, K, N, iter, init_iter){
   # run an initial chain
+  init_out <- dpgmm(data, design, lambda2, alpha, a, b, G, V, K, N, init_iter)
+  
   yTy <- sapply(1:G, function(g) data[g,]%*%data[g,])
-  yTy <- sum(yTy)
+  #yTy <- sum(yTy)
   xTy <- t(design) %*% t(data)
   xTx <- crossprod(design)
   
-  init_out <- dpgmm(data, design, lambda2, alpha, G, V, K, N, init_iter)
-  
-  init <- list()
   # move most relevant atoms to front of vector
+  init <- list()
   indices <- which(init_out$beta[1,,init_iter] %in% init_out$beta_g[1,,init_iter])
   anti_indices <- (1:K)[!(1:K %in% indices)]
   indices <- indices[order(-init_out$pi[indices,init_iter])]
   init$beta <- init_out$beta[,c(indices, anti_indices),init_iter]
   init$pi <- init_out$pi[c(indices, anti_indices),init_iter]
-  init$sigma2 <- init_out$sigma2[init_iter]
+  init$sigma2 <- init_out$sigma2[c(indices, anti_indices),init_iter]
   
   out <- .Call("dpgmm_initR",
                as.numeric(yTy),
@@ -50,6 +50,7 @@ dpgmm_init <- function(data, design, lambda2, alpha, G, V, K, N, iter, init_iter
   names(out) <- c("beta", "pi", "beta_g", "sigma2")
   out$beta <- array(out$beta, dim=c(V, K, iter))
   out$pi <- array(out$pi, dim=c(K, iter))
+  out$sigma2 <- array(out$sigma2, dim=c(K, iter))
   out$beta_g <- array(out$beta_g, dim=c(V, G, iter))
   return(out)
 }

@@ -4,7 +4,7 @@
 \alias{pi_prime}
 \title{Update component weight for given data}
 \usage{
-pi_prime(yTx, xTx, beta, pi, sigma2, V)
+pi_prime(yTy, yTx, xTx, beta, pi, sigma2, V)
 }
 \arguments{
 \item{yTx}{numeric vector of length V}

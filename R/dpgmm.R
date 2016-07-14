@@ -8,9 +8,9 @@
 #' @param V number of varieties/groups
 #' @param N samples per variety/group
 #' @export
-dpgmm <- function(data, design, lambda2, alpha, G, V, K, N, iter){
+dpgmm <- function(data, design, lambda2, alpha, a, b, G, V, K, N, iter){
   yTy <- sapply(1:G, function(g) data[g,]%*%data[g,])
-  yTy <- sum(yTy)
+  #yTy <- sum(yTy)
   xTy <- t(design) %*% t(data)
   xTx <- crossprod(design)
   
@@ -20,6 +20,8 @@ dpgmm <- function(data, design, lambda2, alpha, G, V, K, N, iter){
                as.numeric(xTx),
                as.numeric(lambda2),
                as.numeric(alpha),
+               as.numeric(a),
+               as.numeric(b),
                as.integer(G),
                as.integer(V),
                as.integer(K),
@@ -30,5 +32,6 @@ dpgmm <- function(data, design, lambda2, alpha, G, V, K, N, iter){
   out$beta <- array(out$beta, dim=c(V, K, iter))
   out$pi <- array(out$pi, dim=c(K, iter))
   out$beta_g <- array(out$beta_g, dim=c(V, G, iter))
+  out$sigma2 <- array(out$sigma2, dim=c(K, iter))
   return(out)
 }

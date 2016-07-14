@@ -1,5 +1,5 @@
-require(plyr)
 context("compute_weights")
+require(plyr)
 num_tests <- 10
 set.seed(621621)
 data_sets <- llply(1:num_tests, function(i){
@@ -14,7 +14,7 @@ data_sets <- llply(1:num_tests, function(i){
 
   outputs <- llply(1:num_tests, function(i){
     data <- data_sets[[i]]
-    with(data, compute_weights(xTy, xTx, beta, pi, 1.0, G, K, V))
+    with(data, compute_weights(yTy, xTy, xTx, beta, pi, sigma2, G, K, V))
   })
 
 test_that("output size correct", {
@@ -24,20 +24,20 @@ test_that("output size correct", {
   }
 })
 
-pi_primeR <- function(xTy, xTx, beta, pi, sigma2=1, V){
-  log(pi)  + - 1.0/(2.0*sigma2) * (t(beta)%*% xTx %*% beta - 2 * xTy %*% beta)
+pi_primeR <- function(yTy, xTy, xTx, beta, pi, sigma2, V){
+  log(pi) -log(sigma2)  + - 1.0/(2.0*sigma2) * (yTy + t(beta)%*% xTx %*% beta - 2 * xTy %*% beta)
 }
 
-compute_weightsR <- function(xTy, xTx, beta, pi, G, K, V){
+compute_weightsR <- function(yTy, xTy, xTx, beta, pi, sigma2, G, K, V){
   grid <- expand.grid(k=1:K, g=1:G)
   daply(grid, .(k,g), function(cell) {
-    with(cell, pi_primeR(xTy[(V*(g-1)+1):(V*g)], xTx, beta[(V*(k-1)+1):(V*k)], pi[k], V=V))
+    with(cell, pi_primeR(yTy[g], xTy[(V*(g-1)+1):(V*g)], xTx, beta[(V*(k-1)+1):(V*k)], pi[k], sigma2[k], V=V))
          }
   )}
 
 outputsR <- llply(1:num_tests, function(i){
   data <- data_sets[[i]]
-  out <- with(data, compute_weightsR(xTy, xTx, beta, pi, G, K, V))
+  out <- with(data, compute_weightsR(yTy, xTy, xTx, beta, pi, sigma2, G, K, V))
   dim(out) <- NULL
   out
   })

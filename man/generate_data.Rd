@@ -4,7 +4,7 @@
 \alias{generate_data}
 \title{generates a data set from the model}
 \usage{
-generate_data(X, N, G, K, beta = NULL, pi = NULL)
+generate_data(X, N, G, K, beta = NULL, pi = NULL, sigma2 = NULL)
 }
 \arguments{
 \item{X}{V by V numeric design matrix}
@@ -15,9 +15,11 @@ generate_data(X, N, G, K, beta = NULL, pi = NULL)
 
 \item{K}{number of clusters}
 
-\item{beta}{V by K matrix of location parameters}
+\item{beta}{V by K matrix of cluster locations}
 
 \item{pi}{K-vector of cluster weights}
+
+\item{sigma2}{K-vector of cluster variances}
 }
 \description{
 generates a data set from the model

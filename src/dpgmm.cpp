@@ -5,7 +5,7 @@
 #define Ralloc_List(len)  PROTECT(allocVector(VECSXP, (len)))
 
 extern "C" SEXP dpgmm_initR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP betaR, SEXP piR,
-                           SEXP sigma2R, SEXP lambda2R, SEXP alphaR, SEXP G, SEXP V, SEXP K, SEXP N, SEXP iter){
+                           SEXP sigma2R, SEXP lambda2R, SEXP alphaR, SEXP aR, SEXP bR, SEXP G, SEXP V, SEXP K, SEXP N, SEXP iter){
   int GG, KK, NN, VV, beta_len, I;
   GG = INTEGER(G)[0];
   KK = INTEGER(K)[0];
@@ -14,25 +14,28 @@ extern "C" SEXP dpgmm_initR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP betaR, SEXP pi
   I = INTEGER(iter)[0];
   beta_len = KK*VV;
   
-  double yTy, *xTy_p, *xTx_p, *beta_p, *pi_p, lambda2, alpha;
-  yTy = REAL(yTyR)[0];
+  double *yTy_p, *xTy_p, *xTx_p, *beta_p, *pi_p, *sigma2_p, lambda2, alpha, a, b;
+  yTy_p = NUMERIC_POINTER(yTyR);
   xTy_p = NUMERIC_POINTER(xTyR);
   xTx_p = NUMERIC_POINTER(xTxR);
   beta_p = NUMERIC_POINTER(betaR);
   pi_p = NUMERIC_POINTER(piR);
+  sigma2_p = NUMERIC_POINTER(sigma2R);
   lambda2 = REAL(lambda2R)[0];
   alpha = REAL(alphaR)[0];
+  a = REAL(aR)[0];
+  b = REAL(bR)[0];
 
-  chain_t chain = construct_chain(&yTy, xTy_p, xTx_p, lambda2, alpha, GG, KK, VV, NN);
+  chain_t chain = construct_chain(yTy_p, xTy_p, xTx_p, lambda2, alpha, a, b, GG, KK, VV, NN);
   
   //initialize_chain(chain);
   std::copy(beta_p, beta_p + beta_len, chain.beta.begin());
   std::copy(pi_p, pi_p + KK, chain.pi.begin());
-  chain.sigma2 = REAL(sigma2R)[0];
+  std::copy(sigma2_p, sigma2_p + KK, chain.sigma2.begin());
   
   SEXP beta_out = Ralloc_Real(beta_len*I);
   SEXP beta_g_out = Ralloc_Real(GG*VV*I);
-  SEXP sigma2_out = Ralloc_Real(I);
+  SEXP sigma2_out = Ralloc_Real(KK*I);
   SEXP pi_out = Ralloc_Real(KK*I);
   SEXP list_out = Ralloc_List(4);
   
@@ -53,16 +56,17 @@ extern "C" SEXP dpgmm_initR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP betaR, SEXP pi
       REAL(beta_out)[offset + j] = chain.beta[j];
     
     offset = i*KK;
-    for(int j=0; j<KK; j++)
+    for(int j=0; j<KK; j++){
       REAL(pi_out)[offset + j] = chain.pi[j];
+      REAL(sigma2_out)[offset + j] = chain.sigma2[j];
+    }
     
     offset = i*GG*VV;
     for(int j=0; j<GG; j++)
       for(int k=0; k<VV; k++)
         REAL(beta_g_out)[offset + j*VV + k] = chain.beta[chain.z[j]*VV + k];
-    
-    REAL(sigma2_out)[i] = chain.sigma2;
   }
+  
   SET_VECTOR_ELT(list_out, 0, beta_out);
   SET_VECTOR_ELT(list_out, 1, pi_out);
   SET_VECTOR_ELT(list_out, 2, beta_g_out);
@@ -73,7 +77,7 @@ extern "C" SEXP dpgmm_initR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP betaR, SEXP pi
   return list_out;
 }
 
-extern "C" SEXP dpgmmR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP lambda2R, SEXP alphaR, SEXP G, SEXP V, SEXP K, SEXP N, SEXP iter){
+extern "C" SEXP dpgmmR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP lambda2R, SEXP alphaR, SEXP aR, SEXP bR, SEXP G, SEXP V, SEXP K, SEXP N, SEXP iter){
   int GG, KK, NN, VV, beta_len, I;
   GG = INTEGER(G)[0];
   KK = INTEGER(K)[0];
@@ -82,20 +86,22 @@ extern "C" SEXP dpgmmR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP lambda2R, SEXP alph
   I = INTEGER(iter)[0];
   beta_len = KK*VV;
 
-  double yTy, *xTy_p, *xTx_p, lambda2, alpha;
-  yTy = REAL(yTyR)[0];
+  double *yTy_p, *xTy_p, *xTx_p, lambda2, alpha, a, b;
+  yTy_p = NUMERIC_POINTER(yTyR);
   xTy_p = NUMERIC_POINTER(xTyR);
   xTx_p = NUMERIC_POINTER(xTxR);
   lambda2 = REAL(lambda2R)[0];
   alpha = REAL(alphaR)[0];
+  a = REAL(aR)[0];
+  b = REAL(bR)[0];
   
-  chain_t chain = construct_chain(&yTy, xTy_p, xTx_p, lambda2, alpha, GG, KK, VV, NN);
+  chain_t chain = construct_chain(yTy_p, xTy_p, xTx_p, lambda2, alpha, a, b, GG, KK, VV, NN);
   
   initialize_chain(chain);
   
   SEXP beta_out = Ralloc_Real(beta_len*I);
   SEXP beta_g_out = Ralloc_Real(GG*VV*I);
-  SEXP sigma2_out = Ralloc_Real(I);
+  SEXP sigma2_out = Ralloc_Real(KK*I);
   SEXP pi_out = Ralloc_Real(KK*I);
   SEXP list_out = Ralloc_List(4);
   
@@ -108,7 +114,7 @@ extern "C" SEXP dpgmmR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP lambda2R, SEXP alph
     // print_mat(weights, GG, KK);
     // print_mat(z, 1, GG);
     draw_theta(chain);
-    draw_pi(chain, 1.0); //second arg is alpha of DP(alpha P_0) fame
+    draw_pi(chain, chain.alpha); //second arg is alpha of DP(alpha P_0) fame
     // Rprintf("iter %d: sigma2 = %lf\n", i, chain.sigma2);
     
     int offset = i*beta_len;
@@ -116,15 +122,16 @@ extern "C" SEXP dpgmmR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP lambda2R, SEXP alph
       REAL(beta_out)[offset + j] = chain.beta[j];
   
     offset = i*KK;
-    for(int j=0; j<KK; j++)
+    for(int j=0; j<KK; j++){
       REAL(pi_out)[offset + j] = chain.pi[j];
+      REAL(sigma2_out)[offset + j] = chain.sigma2[j];
+    }
     
     offset = i*GG*VV;
     for(int j=0; j<GG; j++)
       for(int k=0; k<VV; k++)
         REAL(beta_g_out)[offset + j*VV + k] = chain.beta[chain.z[j]*VV + k];
     
-    REAL(sigma2_out)[i] = chain.sigma2;
   }
   SET_VECTOR_ELT(list_out, 0, beta_out);
   SET_VECTOR_ELT(list_out, 1, pi_out);
@@ -136,9 +143,10 @@ extern "C" SEXP dpgmmR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP lambda2R, SEXP alph
   return list_out;
 }
 
-extern "C" SEXP pi_primeR(SEXP yTx, SEXP xTx, SEXP beta, SEXP pi, SEXP sigma2, SEXP V){
-  double *yTx_p, *xTx_p, *beta_p, pi_c, sigma2_c;
+extern "C" SEXP pi_primeR(SEXP yTy, SEXP yTx, SEXP xTx, SEXP beta, SEXP pi, SEXP sigma2, SEXP V){
+  double yTy_c, *yTx_p, *xTx_p, *beta_p, pi_c, sigma2_c;
   int v = INTEGER(V)[0];
+  yTy_c = REAL(yTy)[0];
   yTx_p  = NUMERIC_POINTER(yTx);
   xTx_p  = NUMERIC_POINTER(xTx);
   beta_p = NUMERIC_POINTER(beta);
@@ -147,30 +155,30 @@ extern "C" SEXP pi_primeR(SEXP yTx, SEXP xTx, SEXP beta, SEXP pi, SEXP sigma2, S
   sigma2_c = REAL(sigma2)[0];
   
   SEXP out = Ralloc_Real(1);
-  REAL(out)[0] = pi_prime(yTx_p, xTx_c, beta_p, pi_c, sigma2_c, v);
+  REAL(out)[0] = pi_prime(yTy_c, yTx_p, xTx_c, beta_p, pi_c, sigma2_c, v);
   
   UNPROTECT(1);
   return out;
 }
 
-extern "C" SEXP compute_weightsR(SEXP xTy, SEXP xTx, SEXP beta, SEXP pi, SEXP sigma2, SEXP G, SEXP K, SEXP V){
-  double *xTy_p, *xTx_p, *beta_p, *pi_p;
+extern "C" SEXP compute_weightsR(SEXP yTy, SEXP xTy, SEXP xTx, SEXP beta, SEXP pi, SEXP sigma2, SEXP G, SEXP K, SEXP V){
+  double *yTy_p, *xTy_p, *xTx_p, *beta_p, *pi_p, *sigma2_p;
   int GG, KK, VV;
   GG = INTEGER(G)[0];
   KK = INTEGER(K)[0];
   VV = INTEGER(V)[0];
   int NN = 1; //arbitrary
-  double yTy = 1.0; //arbitrary
+  yTy_p  = NUMERIC_POINTER(yTy);
   xTy_p  = NUMERIC_POINTER(xTy);
   xTx_p  = NUMERIC_POINTER(xTx);
-  chain_t chain = construct_chain(&yTy, xTy_p, xTx_p, 1, 1, GG, KK, VV, NN);
+  chain_t chain = construct_chain(yTy_p, xTy_p, xTx_p, 1, 1, 1, 1, GG, KK, VV, NN);
   
   beta_p = NUMERIC_POINTER(beta);
   pi_p   = NUMERIC_POINTER(pi);
+  sigma2_p = NUMERIC_POINTER(sigma2);
   std::copy(beta_p, beta_p + KK*VV, chain.beta.begin());
   std::copy(pi_p, pi_p + KK, chain.pi.begin());
-  
-  chain.sigma2 = REAL(sigma2)[0];
+  std::copy(sigma2_p, sigma2_p + KK, chain.sigma2.begin());
   
   compute_weights(chain);
   
@@ -240,7 +248,7 @@ extern "C" SEXP draw_zR(SEXP weights, SEXP G, SEXP K){
   double yTy = 0;
   fvec xTy(GG);
   fvec xTx(1);
-  chain_t chain = construct_chain(&yTy, &(xTy[0]), &(xTx[0]), 1, 1, GG, KK, 1, 1);
+  chain_t chain = construct_chain(&yTy, &(xTy[0]), &(xTx[0]), 1, 1, 1, 1, GG, KK, 1, 1);
   std::copy(weight_ptr, weight_ptr + GG*KK, chain.weights.begin());
 
   GetRNGstate();
@@ -255,36 +263,39 @@ extern "C" SEXP draw_zR(SEXP weights, SEXP G, SEXP K){
 }
 
   
-extern "C" SEXP cluster_sumsR(SEXP k, SEXP xTy, SEXP G, SEXP V, SEXP n, SEXP z){
+extern "C" SEXP cluster_sumsR(SEXP k, SEXP yTy, SEXP xTy, SEXP G, SEXP V, SEXP z){
   int kk = INTEGER(k)[0];
   int GG = INTEGER(G)[0];
   int VV = INTEGER(V)[0];
-  int nn = INTEGER(n)[0];
   int *z_ptr = INTEGER_POINTER(z);
   double *xTy_ptr = NUMERIC_POINTER(xTy);
+  double *yTy_ptr = NUMERIC_POINTER(yTy);
 
+  fvec yTy_c(yTy_ptr, yTy_ptr + GG);
   fvec xTy_c(xTy_ptr, xTy_ptr + GG*VV);
   uvec z_c(z_ptr, z_ptr + GG);
   fvec Gkk(1);
+  double yTyk;
   fvec xTyk(VV);
-  cluster_sums(kk, xTy_c, GG, VV, nn, z_c, Gkk.begin(), xTyk);
-  Rprintf("%d", z_c[0]);
-  
-  SEXP result = Ralloc_List(2);
+  cluster_sums(kk, yTy_c, xTy_c, GG, VV, z_c, Gkk.begin(), &yTyk, xTyk);
+
+  SEXP result = Ralloc_List(3);
   SEXP GkR = Ralloc_Real(1);
+  SEXP yTykR = Ralloc_Real(1);
   SEXP xTykR = Ralloc_Real(VV);
   
   REAL(GkR)[0] = Gkk[0];
-  
+  REAL(yTykR)[0] = yTyk;
   for(int i=0; i<VV; i++){
     REAL(xTykR)[i] = xTyk[i];
   }
   
   SET_VECTOR_ELT(result, 0, GkR);
-  SET_VECTOR_ELT(result, 1, xTykR);
+  SET_VECTOR_ELT(result, 1, yTykR);
+  SET_VECTOR_ELT(result, 2, xTykR);
   
   
-  UNPROTECT(3);
+  UNPROTECT(4);
   return result;
 }
   
@@ -382,7 +393,7 @@ extern "C" SEXP draw_piR(SEXP GK, SEXP K){
   double yTy = 0;
   fvec xTy(1);
   fvec xTx(1);
-  chain_t chain = construct_chain(&yTy, &(xTy[0]), &(xTx[0]), 1, 1, 1, KK, 1, 1);
+  chain_t chain = construct_chain(&yTy, &(xTy[0]), &(xTx[0]), 1, 1, 1, 1, 1, KK, 1, 1);
   std::copy(Gk_ptr, Gk_ptr + KK, chain.Gk.begin());
   GetRNGstate();
   draw_pi(chain, 1.0);
@@ -401,24 +412,26 @@ extern "C" SEXP draw_thetaR(SEXP z, SEXP yTy, SEXP xTy, SEXP xTx, SEXP G, SEXP K
   VV = INTEGER(V)[0];
   NN = INTEGER(N)[0];
   int *z_p = INTEGER_POINTER(z);
-  double yTyC = REAL(yTy)[0];
+  double *yTy_p = NUMERIC_POINTER(yTy);
   double *xTy_p = NUMERIC_POINTER(xTy);
   double *xTx_p = NUMERIC_POINTER(xTx);
   // assume that lambda2 = 1.0
-  chain_t chain = construct_chain(&yTyC, xTy_p, xTx_p, 1.0, 1.0, GG, KK, VV, NN);
+  chain_t chain = construct_chain(yTy_p, xTy_p, xTx_p, 1.0, 1.0, 1.0, 1.0, GG, KK, VV, NN);
+  initialize_chain(chain);
   std::copy(z_p, z_p+GG, chain.z.begin());
-  chain.sigma2 = 1.0;
 
   GetRNGstate();
   draw_theta(chain);
   PutRNGstate();
+  
   SEXP out = Ralloc_List(2);
   SEXP beta = Ralloc_Real(KK*VV);
-  SEXP sigma2 = Ralloc_Real(1);
+  SEXP sigma2 = Ralloc_Real(KK);
   
   for(int i=0; i<(KK*VV); i++)
     REAL(beta)[i] = chain.beta[i];
-  REAL(sigma2)[0] = chain.sigma2;
+  for(int k=0; k<KK; KK++)
+    REAL(sigma2)[k] = chain.sigma2[k];
   
   SET_VECTOR_ELT(out, 0, beta);
   SET_VECTOR_ELT(out, 1, sigma2);
@@ -441,7 +454,7 @@ extern "C" SEXP linear_comb_vecR(SEXP n, SEXP alpha, SEXP x, SEXP y){
   return yout;
 }
 
-extern "C" SEXP send_chain(SEXP yTy, SEXP xTy, SEXP xTx, SEXP lambda2R, SEXP alphaR, SEXP G, SEXP K, SEXP V, SEXP N){
+extern "C" SEXP send_chain(SEXP yTy, SEXP xTy, SEXP xTx, SEXP lambda2R, SEXP alphaR, SEXP aR, SEXP bR, SEXP G, SEXP K, SEXP V, SEXP N){
   int GG = INTEGER(G)[0];
   int KK = INTEGER(K)[0];
   int VV = INTEGER(V)[0];
@@ -451,7 +464,9 @@ extern "C" SEXP send_chain(SEXP yTy, SEXP xTy, SEXP xTx, SEXP lambda2R, SEXP alp
   double *xTx_p = NUMERIC_POINTER(xTx);
   double lambda2 = REAL(lambda2R)[0];
   double alpha = REAL(alphaR)[0];
-  chain_t chain = construct_chain(yTy_p, xTy_p, xTx_p, lambda2, alpha, GG, KK, VV, NN);
+  double a = REAL(aR)[0];
+  double b = REAL(bR)[0];
+  chain_t chain = construct_chain(yTy_p, xTy_p, xTx_p, lambda2, alpha, a, b, GG, KK, VV, NN);
   initialize_chain(chain);
   print_chain_state(chain);
   SEXP out = Ralloc_Int(1);

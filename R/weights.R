@@ -10,8 +10,9 @@
 #' @param n int
 #' @param V int
 #' @export
-compute_weights <- function(yTx, xTx, beta, pi, sigma2, G, K, V){
+compute_weights <- function(yTy, yTx, xTx, beta, pi, sigma2, G, K, V){
   out <- .Call("compute_weightsR",
+               as.numeric(yTy),
                as.numeric(yTx),
                as.numeric(xTx),
                as.numeric(beta),

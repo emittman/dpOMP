@@ -11,22 +11,22 @@ void draw_theta(chain_t &chain){
   int G = chain.G;
   int K = chain.K;
   int V = chain.V;
-  int N = chain.N;
-  fvec IGscale(K);
-  
+
   //private k?  
   #pragma omp parallel for
   for(int k = 0; k<K; k++){
     // Rprintf("cluster %d:",k);
     fveci Gkk = chain.Gk.begin() + k;
+    double yTyk;
     fvec xTyk(V);
     fvec beta_hat(V);
     fvec beta_raw(V);
     fvec chol_S(V*V);
-    fveci IGscalek = IGscale.begin() + k;
+    double IGscalek = 0.0;
+    double sigma2k = chain.sigma2[k];
     
     //compute Gkk and xTyk
-    cluster_sums(k, chain.xTy, G, V, N, chain.z, Gkk, xTyk);
+    cluster_sums(k, chain.yTy, chain.xTy, G, V, chain.z, Gkk, &yTyk, xTyk);
     
 //         Rprintf("xTyk:\n");
 //         print_mat(xTyk, 1, V);
@@ -34,7 +34,7 @@ void draw_theta(chain_t &chain){
 //         Rprintf("Gk:%.0lf\n", *Gkk);
     
     // S_inv = (X^T * X + sigma2/lambda2 * I)
-    construct_precision_mat(chain.xTx, chol_S, *Gkk, chain.sigma2, chain.lambda2, V);
+    construct_precision_mat(chain.xTx, chol_S, *Gkk, sigma2k, chain.lambda2, V);
     //     Rprintf("prec:\n");
     //     print_mat(chol_S, V, V);
     //
@@ -61,7 +61,7 @@ void draw_theta(chain_t &chain){
 //     print_mat(beta_raw, 1, V);
 
 // translate (scaled)beta_raw by beta_hat -> beta_hat
-    linear_comb_vec(V, sqrt(chain.sigma2), beta_raw, beta_hat); 
+    linear_comb_vec(V, sqrt(sigma2k), beta_raw, beta_hat); 
 //     Rprintf("\nbeta draw:\n");
 //     print_mat(beta_hat, 1, V);
 
@@ -69,15 +69,16 @@ void draw_theta(chain_t &chain){
       chain.beta[k*V + v] = beta_hat[v];
   
   // compute contribution from cluster K to IGscale
-  increment_IGscale(IGscalek, xTyk, chain.xTx, beta_hat, *Gkk, V);
+    calculate_IGscale(&IGscalek, yTyk, xTyk, chain.xTx, beta_hat, *Gkk, V);
+    chain.sigma2[k] = rinvgamma(*Gkk/2 + chain.a, IGscalek/2 + chain.b);
 }
 //       Rprintf("IG:\n");
 //       Rprintf("%lf\n",*IGscale);
 //   Rprintf("yTy is: %lf\n", chain.yTy);
 //   Rprintf("compnents of IGscale:\n");
 //   print_mat(IGscale, 1, K);
-  double scale = std::accumulate(IGscale.begin(), IGscale.end(), 0.0);
-  chain.sigma2 = rinvgamma(chain.G*V*chain.N/2, (chain.yTy - scale)/2);
+//   double scale = std::accumulate(IGscale.begin(), IGscale.end(), 0.0);
+//   chain.sigma2 = rinvgamma(chain.G*V*chain.N/2, (chain.yTy - scale)/2);
 //   Rprintf("IG shape = %d\n", G*V*n/2);
 //   Rprintf("IG scale = %lf\n",(*yTy - scale)/2);
 }

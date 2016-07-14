@@ -7,10 +7,11 @@
 #' @param sigma2 positive real number
 #' @param V int
 #' @export
-pi_prime <- function(yTx, xTx, beta, pi, sigma2, V){
+pi_prime <- function(yTy, yTx, xTx, beta, pi, sigma2, V){
   if(pi<0 | pi>1) error("pi must be between 0 and 1")
   if(sigma2<= 0) error("sigma2 must be positive")
   out <- .Call("pi_primeR",
+               as.numeric(yTy),
                as.numeric(yTx),
                as.numeric(xTx),
                as.numeric(beta),
