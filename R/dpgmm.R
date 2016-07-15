@@ -9,7 +9,7 @@
 #' @param N samples per variety/group
 #' @export
 dpgmm <- function(data, design, lambda2, alpha, a, b, G, V, K, N, iter){
-  yTy <- sapply(1:G, function(g) data[g,]%*%data[g,])
+  yTy <- apply(data, 1, crossprod)
   #yTy <- sum(yTy)
   xTy <- t(design) %*% t(data)
   xTx <- crossprod(design)
@@ -28,10 +28,11 @@ dpgmm <- function(data, design, lambda2, alpha, a, b, G, V, K, N, iter){
                as.integer(N),
                as.integer(iter),
                PACKAGE = "dpOMP")
-  names(out) <- c("beta", "pi", "beta_g", "sigma2")
+  names(out) <- c("beta", "pi", "beta_g", "sigma2", "sigma2_g")
   out$beta <- array(out$beta, dim=c(V, K, iter))
   out$pi <- array(out$pi, dim=c(K, iter))
   out$beta_g <- array(out$beta_g, dim=c(V, G, iter))
   out$sigma2 <- array(out$sigma2, dim=c(K, iter))
+  out$sigma2_g <- array(out$sigma2_g, dim=c(G, iter))
   return(out)
 }
