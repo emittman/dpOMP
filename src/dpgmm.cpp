@@ -50,7 +50,8 @@ extern "C" SEXP dpgmm_initR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP betaR, SEXP pi
     
     int offset = i*beta_len;
     for(int j=0; j<beta_len; j++)
-      REAL(beta_out)[offset + j] = chain.beta[j];
+      for(int k=0; k<VV; k++)
+        REAL(beta_out)[offset + j*VV + k] = chain.beta[j];
     
     offset = i*KK;
     for(int j=0; j<KK; j++)
@@ -113,7 +114,8 @@ extern "C" SEXP dpgmmR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP lambda2R, SEXP alph
     
     int offset = i*beta_len;
     for(int j=0; j<beta_len; j++)
-      REAL(beta_out)[offset + j] = chain.beta[j];
+      for(int k=0; k<VV; k++)
+        REAL(beta_out)[offset + j*VV + k] = chain.beta[j];
   
     offset = i*KK;
     for(int j=0; j<KK; j++)
