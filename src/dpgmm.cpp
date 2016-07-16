@@ -33,34 +33,30 @@ extern "C" SEXP dpgmm_initR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP betaR, SEXP pi
   std::copy(pi_p, pi_p + KK, chain.pi.begin());
   std::copy(sigma2_p, sigma2_p + KK, chain.sigma2.begin());
   
-  SEXP beta_out = Ralloc_Real(beta_len*I);
+//   SEXP beta_out = Ralloc_Real(beta_len*I);
   SEXP beta_g_out = Ralloc_Real(GG*VV*I);
-  SEXP sigma2_out = Ralloc_Real(KK*I);
+//   SEXP sigma2_out = Ralloc_Real(KK*I);
   SEXP sigma2_g_out = Ralloc_Real(GG*I);
-  SEXP pi_out = Ralloc_Real(KK*I);
-  SEXP list_out = Ralloc_List(5);
+//   SEXP pi_out = Ralloc_Real(KK*I);
+  SEXP max_index = Ralloc_Int(I);
+  SEXP list_out = Ralloc_List(3);
   
   for(int i=0; i<I; i++){
     // print_mat(weights, GG, KK);
     compute_weights(chain);
     draw_z(chain);
-    //     Rprintf("allocation iter %d:\n",i);
-    //     print_mat(z, 1, GG);
-    // print_mat(weights, GG, KK);
-    // print_mat(z, 1, GG);
     draw_theta(chain);
-    draw_pi(chain, chain.alpha); //second arg is alpha of DP(alpha P_0) fame
-    // Rprintf("iter %d: sigma2 = %lf\n", i, chain.sigma2);
-    
+    draw_pi(chain, chain.alpha);
+
     int offset = i*beta_len;
-    for(int j=0; j<beta_len; j++)
-      REAL(beta_out)[offset + j] = chain.beta[j];
-    
-    offset = i*KK;
-    for(int j=0; j<KK; j++){
-      REAL(pi_out)[offset + j] = chain.pi[j];
-      REAL(sigma2_out)[offset + j] = chain.sigma2[j];
-    }
+//     for(int j=0; j<beta_len; j++)
+//       REAL(beta_out)[offset + j] = chain.beta[j];
+//     
+//     offset = i*KK;
+//     for(int j=0; j<KK; j++){
+//       REAL(pi_out)[offset + j] = chain.pi[j];
+//       REAL(sigma2_out)[offset + j] = chain.sigma2[j];
+//     }
     
     offset = i*GG*VV;
     for(int j=0; j<GG; j++)
@@ -70,15 +66,18 @@ extern "C" SEXP dpgmm_initR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP betaR, SEXP pi
     offset = i*GG;
     for(int j=0; j<GG; j++)
       REAL(sigma2_g_out)[offset + j] = chain.sigma2[chain.z[j]];
+    
+    INTEGER(max_index)[i] = (int) *max_element(chain.z.begin(), chain.z.end());
   }
   
-  SET_VECTOR_ELT(list_out, 0, beta_out);
-  SET_VECTOR_ELT(list_out, 1, pi_out);
-  SET_VECTOR_ELT(list_out, 2, beta_g_out);
-  SET_VECTOR_ELT(list_out, 3, sigma2_out);
-  SET_VECTOR_ELT(list_out, 4, sigma2_g_out);
+  // SET_VECTOR_ELT(list_out, 0, beta_out);
+  // SET_VECTOR_ELT(list_out, 1, pi_out);
+  SET_VECTOR_ELT(list_out, 0, beta_g_out);
+  // SET_VECTOR_ELT(list_out, 3, sigma2_out);
+  SET_VECTOR_ELT(list_out, 1, sigma2_g_out);
+  SET_VECTOR_ELT(list_out, 2, max_index);
   
-  UNPROTECT(6);
+  UNPROTECT(4);
   
   return list_out;
 }
@@ -106,11 +105,11 @@ extern "C" SEXP dpgmmR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP lambda2R, SEXP alph
   initialize_chain(chain);
   
   SEXP beta_out = Ralloc_Real(beta_len*I);
-  SEXP beta_g_out = Ralloc_Real(GG*VV*I);
+//   SEXP beta_g_out = Ralloc_Real(GG*VV*I);
   SEXP sigma2_out = Ralloc_Real(KK*I);
-  SEXP sigma2_g_out = Ralloc_Real(GG*I);
+  // SEXP sigma2_g_out = Ralloc_Real(GG*I);
   SEXP pi_out = Ralloc_Real(KK*I);
-  SEXP list_out = Ralloc_List(5);
+  SEXP list_out = Ralloc_List(3);
   
   for(int i=0; i<I; i++){
     // print_mat(weights, GG, KK);
@@ -134,23 +133,23 @@ extern "C" SEXP dpgmmR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP lambda2R, SEXP alph
       REAL(sigma2_out)[offset + j] = chain.sigma2[j];
     }
     
-    offset = i*GG*VV;
-    for(int j=0; j<GG; j++)
-      for(int k=0; k<VV; k++)
-        REAL(beta_g_out)[offset + j*VV + k] = chain.beta[chain.z[j]*VV + k];
-    
-    offset = i*GG;
-    for(int j=0; j<GG; j++)
-      REAL(sigma2_g_out)[offset + j] = chain.sigma2[chain.z[j]];
+//     offset = i*GG*VV;
+//     for(int j=0; j<GG; j++)
+//       for(int k=0; k<VV; k++)
+//         REAL(beta_g_out)[offset + j*VV + k] = chain.beta[chain.z[j]*VV + k];
+//     
+//     offset = i*GG;
+//     for(int j=0; j<GG; j++)
+//       REAL(sigma2_g_out)[offset + j] = chain.sigma2[chain.z[j]];
     
   }
   SET_VECTOR_ELT(list_out, 0, beta_out);
-  SET_VECTOR_ELT(list_out, 1, pi_out);
-  SET_VECTOR_ELT(list_out, 2, beta_g_out);
-  SET_VECTOR_ELT(list_out, 3, sigma2_out);
-  SET_VECTOR_ELT(list_out, 4, sigma2_g_out);
+  // SET_VECTOR_ELT(list_out, 2, beta_g_out);
+  SET_VECTOR_ELT(list_out, 1, sigma2_out);
+  SET_VECTOR_ELT(list_out, 2, pi_out);
+  // SET_VECTOR_ELT(list_out, 4, sigma2_g_out);
   
-  UNPROTECT(6);
+  UNPROTECT(4);
   
   return list_out;
 }

@@ -10,6 +10,7 @@
 #include <Rmath.h>
 #include <cmath>
 #include <numeric>
+#include <algorithm>
 #include <omp.h>
 
 #include "types.h"

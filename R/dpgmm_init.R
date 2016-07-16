@@ -29,8 +29,8 @@ dpgmm_init <- function(data, design, lambda2, alpha, a, b,  G, V, K, N, iter, in
   anti_indices <- (1:K)[!(1:K %in% indices)]
   indices <- indices[order(-init_out$pi[indices,init_iter])]
   init$beta <- init_out$beta[,c(indices, anti_indices),init_iter]
-  init$pi <- init_out$pi[c(indices, anti_indices),init_iter]
   init$sigma2 <- init_out$sigma2[c(indices, anti_indices),init_iter]
+  init$pi <- init_out$pi[c(indices, anti_indices),init_iter]
   
   out <- .Call("dpgmm_initR",
                as.numeric(yTy),
@@ -50,10 +50,10 @@ dpgmm_init <- function(data, design, lambda2, alpha, a, b,  G, V, K, N, iter, in
                as.integer(iter),
                PACKAGE = "dpOMP")
 
-  names(out) <- c("beta", "pi", "beta_g", "sigma2", "sigma2_g")
-  out$beta <- array(out$beta, dim=c(V, K, iter))
-  out$pi <- array(out$pi, dim=c(K, iter))
-  out$sigma2 <- array(out$sigma2, dim=c(K, iter))
+  names(out) <- c("beta_g", "sigma2_g", "max_index")
+#   out$beta <- array(out$beta, dim=c(V, K, iter))
+#   out$pi <- array(out$pi, dim=c(K, iter))
+#   out$sigma2 <- array(out$sigma2, dim=c(K, iter))
   out$beta_g <- array(out$beta_g, dim=c(V, G, iter))
   out$sigma2_g <- array(out$sigma2_g, dim=c(G, iter))
   return(out)
