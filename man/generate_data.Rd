@@ -4,7 +4,7 @@
 \alias{generate_data}
 \title{generates a data set from the model}
 \usage{
-generate_data(X, N, G, K, beta = NULL, pi = NULL)
+generate_data(X, N, G, K, beta = NULL, pi = NULL, sigma2 = 1)
 }
 \arguments{
 \item{X}{V by V numeric design matrix}
