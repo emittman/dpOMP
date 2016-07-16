@@ -117,15 +117,20 @@ extern "C" SEXP dpgmmR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP lambda2R, SEXP alph
     // Rprintf("iter %d: sigma2 = %lf\n", i, chain.sigma2);
     
     int offset = i*beta_len;
-    for(int j=0; j<beta_len; j++)
-      REAL(beta_out)[offset + j] = chain.beta[j];
+    for(int j=0; j<beta_len; j++){
+      for(int k=0; k<KK; k++){
+        REAL(beta_out)[offset + j] = chain.beta[j];
+      }
+    }
     
     offset = i*KK;
     for(int j=0; j<KK; j++){
       REAL(pi_out)[offset + j] = chain.pi[j];
-      // REAL(sigma2_out)[offset + j] = chain.sigma2[j];
     }
+
+    REAL(sigma2_out)[i] = chain.sigma2;
     
+        
 //     offset = i*GG*VV;
 //     for(int j=0; j<GG; j++)
 //       for(int k=0; k<VV; k++)
