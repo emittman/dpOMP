@@ -12,6 +12,8 @@
 #' @export
 compute_weights <- function(yTx, xTx, beta, pi, sigma2, G, K, V){
   out <- .Call("compute_weightsR",
+               #just insert some junk for yTy
+               as.numeric(1.0),
                as.numeric(yTx),
                as.numeric(xTx),
                as.numeric(beta),

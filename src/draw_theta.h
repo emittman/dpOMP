@@ -11,7 +11,7 @@ void draw_theta(chain_t &chain){
   int G = chain.G;
   int K = chain.K;
   int V = chain.V;
-  int N = chain.N;
+//   int N = chain.N;
   fvec IGscale(K);
   
   //private k?  
@@ -26,7 +26,7 @@ void draw_theta(chain_t &chain){
     fveci IGscalek = IGscale.begin() + k;
     
     //compute Gkk and xTyk
-    cluster_sums(k, chain.xTy, G, V, N, chain.z, Gkk, xTyk);
+    cluster_sums(k, chain.xTy, G, V, chain.z, Gkk, xTyk);
     
     if(*Gkk > 0){
       // S_inv = (X^T * X + sigma2/lambda2 * I)
