@@ -29,6 +29,5 @@ dpgmm <- function(data, design, lambda2, alpha, G, V, K, N, iter){
   names(out) <- c("beta", "sigma2", "pi")
   out$beta <- array(out$beta, dim=c(V, K, iter))
   out$pi <- array(out$pi, dim=c(K, iter))
-  out$beta_g <- array(out$beta_g, dim=c(V, G, iter))
   return(out)
 }
