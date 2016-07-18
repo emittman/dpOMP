@@ -11,6 +11,7 @@
 #' @export
 
 generate_data <- function(X, N, G, K, beta=NULL, pi=NULL, sigma2=NULL){
+
   if(is.null(dim(X)) || dim(X)[1] != dim(X)[2]) stop("X must be a square matrix")
   V <- dim(X)[1]
   if(!is.null(beta)){
@@ -34,6 +35,7 @@ generate_data <- function(X, N, G, K, beta=NULL, pi=NULL, sigma2=NULL){
   groupMeans <- Xexpand %*% beta
   z <- sample(1:K, G, replace=T, prob = pi)
   y <- t(round(sapply(z, function(zz) rnorm(V*N, groupMeans[,zz], sqrt(sigma2[zz]))), 3))
+
   list(G = G,
        V = V,
        N = N,

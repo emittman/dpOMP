@@ -48,6 +48,7 @@ double get_cluster_size(fvec &indices){
 }
 
 void cluster_sums(int k, fvec &yTy, fvec &xTy, int G, int V, const uvec &z, fveci Gkk, double *yTyk, fvec &xTyk){
+
   
     fvec indic(G);
     get_k_indices(z, indic, k);

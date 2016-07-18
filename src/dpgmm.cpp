@@ -37,6 +37,7 @@ extern "C" SEXP dpgmm_initR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP betaR, SEXP pi
   SEXP beta_g_out = Ralloc_Real(GG*VV*I);
 //   SEXP sigma2_out = Ralloc_Real(KK*I);
   SEXP sigma2_g_out = Ralloc_Real(GG*I);
+
 //   SEXP pi_out = Ralloc_Real(KK*I);
   SEXP max_index = Ralloc_Int(I);
   SEXP list_out = Ralloc_List(3);
@@ -101,12 +102,14 @@ extern "C" SEXP dpgmmR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP lambda2R, SEXP alph
   b = REAL(bR)[0];
   
   chain_t chain = construct_chain(yTy_p, xTy_p, xTx_p, lambda2, alpha, a, b, GG, KK, VV, NN);
+
   
   initialize_chain(chain);
   
   SEXP beta_out = Ralloc_Real(beta_len*I);
 //   SEXP beta_g_out = Ralloc_Real(GG*VV*I);
   SEXP sigma2_out = Ralloc_Real(KK*I);
+
   // SEXP sigma2_g_out = Ralloc_Real(GG*I);
   SEXP pi_out = Ralloc_Real(KK*I);
   SEXP list_out = Ralloc_List(3);
@@ -183,6 +186,7 @@ extern "C" SEXP compute_weightsR(SEXP yTy, SEXP xTy, SEXP xTx, SEXP beta, SEXP p
   xTy_p  = NUMERIC_POINTER(xTy);
   xTx_p  = NUMERIC_POINTER(xTx);
   chain_t chain = construct_chain(yTy_p, xTy_p, xTx_p, 1, 1, 1, 1, GG, KK, VV, NN);
+
   
   beta_p = NUMERIC_POINTER(beta);
   pi_p   = NUMERIC_POINTER(pi);
@@ -275,6 +279,7 @@ extern "C" SEXP draw_zR(SEXP weights, SEXP G, SEXP K){
 
 
 extern "C" SEXP cluster_sumsR(SEXP k, SEXP yTy, SEXP xTy, SEXP G, SEXP V, SEXP z){
+
   int kk = INTEGER(k)[0];
   int GG = INTEGER(G)[0];
   int VV = INTEGER(V)[0];
@@ -289,6 +294,7 @@ extern "C" SEXP cluster_sumsR(SEXP k, SEXP yTy, SEXP xTy, SEXP G, SEXP V, SEXP z
   double yTyk;
   fvec xTyk(VV);
   cluster_sums(kk, yTy_c, xTy_c, GG, VV, z_c, Gkk.begin(), &yTyk, xTyk);
+
   
   SEXP result = Ralloc_List(3);
   SEXP GkR = Ralloc_Real(1);
@@ -297,6 +303,7 @@ extern "C" SEXP cluster_sumsR(SEXP k, SEXP yTy, SEXP xTy, SEXP G, SEXP V, SEXP z
   
   REAL(GkR)[0] = Gkk[0];
   REAL(yTykR)[0] = yTyk;
+
   for(int i=0; i<VV; i++){
     REAL(xTykR)[i] = xTyk[i];
   }
@@ -484,4 +491,4 @@ extern "C" SEXP send_chain(SEXP yTy, SEXP xTy, SEXP xTx, SEXP lambda2R, SEXP alp
   INTEGER(out)[0] = 0;
   UNPROTECT(1);
   return out;
-}
+}                                                

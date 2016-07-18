@@ -36,7 +36,7 @@ void draw_theta(chain_t &chain){
     
       // solve normal equation X^Ty = S_inv * beta_hat, convert S_inv to cholesky factor
       solve_normaleq_symm_mat(V, &(chol_S[0]), &(beta_hat[0])); 
-    
+
       // invert S_inv so that chol_S now contains cholesky factor of (XTX + sigma2/lambda2 I)^{-1}
       invert_lower_tri(V, &(chol_S[0])); 
 
