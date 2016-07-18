@@ -1,12 +1,12 @@
 Package: dpOMP
 Type: Package
-Title: Uses OpenMP for stuff
+Title: Parallelized Gibbs Sampler for DPGMM Model
 Version: 0.1
 Date: 2016-05-26
 Author: Eric Mittman
 Maintainer: Eric Mittman <emittman@iastate.edu>
-Description: More about what it does (maybe more than one line)
-License: What license is it under?
+Description: Provides functions for sampling from posterior of Dirichlet process Gaussian mixture model where data have a recurrent design structure.
+License: GPL (>=2)
 RoxygenNote: 5.0.1
 Suggests:
     MCMCpack

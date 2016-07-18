@@ -38,6 +38,8 @@ extern "C" SEXP dpgmm_initR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP betaR, SEXP pi
   SEXP max_index = Ralloc_Int(I);
   SEXP list_out = Ralloc_List(3);
   
+  GetRNGstate();
+  
   for(int i=0; i<I; i++){
     // print_mat(weights, GG, KK);
     compute_weights(chain);
@@ -64,6 +66,8 @@ extern "C" SEXP dpgmm_initR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP betaR, SEXP pi
     
     INTEGER(max_index)[i] = (int) *max_element(chain.z.begin(), chain.z.end());
   }
+  
+  PutRNGstate();
   
   // SET_VECTOR_ELT(list_out, 0, beta_out);
   // SET_VECTOR_ELT(list_out, 1, pi_out);
@@ -104,6 +108,8 @@ extern "C" SEXP dpgmmR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP lambda2R, SEXP alph
   SEXP pi_out = Ralloc_Real(KK*I);
   SEXP list_out = Ralloc_List(3);
   
+  GetRNGstate();
+  
   for(int i=0; i<I; i++){
     // print_mat(weights, GG, KK);
     compute_weights(chain);
@@ -130,23 +136,13 @@ extern "C" SEXP dpgmmR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP lambda2R, SEXP alph
 
     REAL(sigma2_out)[i] = chain.sigma2;
     
-        
-//     offset = i*GG*VV;
-//     for(int j=0; j<GG; j++)
-//       for(int k=0; k<VV; k++)
-//         REAL(beta_g_out)[offset + j*VV + k] = chain.beta[chain.z[j]*VV + k];
-//     
-//     offset = i*GG;
-//     for(int j=0; j<GG; j++)
-//       REAL(sigma2_g_out)[offset + j] = chain.sigma2[chain.z[j]];
-    
   }
+  PutRNGstate();
+  
   SET_VECTOR_ELT(list_out, 0, beta_out);
-  // SET_VECTOR_ELT(list_out, 2, beta_g_out);
   SET_VECTOR_ELT(list_out, 1, sigma2_out);
   SET_VECTOR_ELT(list_out, 2, pi_out);
-  // SET_VECTOR_ELT(list_out, 4, sigma2_g_out);
-  
+
   UNPROTECT(4);
   
   return list_out;
