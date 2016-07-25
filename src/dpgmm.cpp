@@ -4,6 +4,86 @@
 #define Ralloc_Int(len)   PROTECT(allocVector(INTSXP, (len)))
 #define Ralloc_List(len)  PROTECT(allocVector(VECSXP, (len)))
 
+
+extern "C" SEXP dpgmm_init_w_trimR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP betaR, SEXP piR,
+                                  SEXP sigma2R, SEXP lambda2R, SEXP alphaR, SEXP aR, SEXP bR,
+                                  SEXP G, SEXP V, SEXP K, SEXP N, SEXP iter, SEXP save_indexR, SEXP num_saveR){
+  int GG, KK, NN, VV, beta_len, I, num_save;
+  GG = INTEGER(G)[0];
+  KK = INTEGER(K)[0];
+  NN = INTEGER(N)[0];
+  VV = INTEGER(V)[0];
+  I = INTEGER(iter)[0];
+  beta_len = KK*VV;
+  num_save =INTEGER(num_saveR)[0];
+  
+  unsigned int *save_index_ptr = (unsigned int *)INTEGER_POINTER(save_indexR);
+  uvec save_index(save_index_ptr, save_index_ptr + num_save);
+  // print_mat(save_index, 1, num_save);
+  
+  double *yTy_p, *xTy_p, *xTx_p, *beta_p, *pi_p, *sigma2_p, lambda2, alpha, a, b;
+  yTy_p = NUMERIC_POINTER(yTyR);
+  xTy_p = NUMERIC_POINTER(xTyR);
+  xTx_p = NUMERIC_POINTER(xTxR);
+  beta_p = NUMERIC_POINTER(betaR);
+  pi_p = NUMERIC_POINTER(piR);
+  sigma2_p = NUMERIC_POINTER(sigma2R);
+  lambda2 = REAL(lambda2R)[0];
+  alpha = REAL(alphaR)[0];
+  a = REAL(aR)[0];
+  b = REAL(bR)[0];
+  
+  chain_t chain = construct_chain(yTy_p, xTy_p, xTx_p, lambda2, alpha, a, b, GG, KK, VV, NN);
+  
+  //initialize_chain(chain);
+  std::copy(beta_p, beta_p + beta_len, chain.beta.begin());
+  std::copy(pi_p, pi_p + KK, chain.pi.begin());
+  std::copy(sigma2_p, sigma2_p + KK, chain.sigma2.begin());
+  
+  //   SEXP beta_out = Ralloc_Real(beta_len*I);
+  SEXP beta_g_out = Ralloc_Real(num_save*VV*I);
+  //   SEXP sigma2_out = Ralloc_Real(KK*I);
+  SEXP sigma2_g_out = Ralloc_Real(num_save*I);
+  
+  //   SEXP pi_out = Ralloc_Real(KK*I);
+  SEXP max_index = Ralloc_Int(I);
+  SEXP list_out = Ralloc_List(3);
+  
+  int offset;
+  GetRNGstate();
+  for(int i=0; i<I; i++){
+    compute_weights(chain);
+    draw_z(chain);
+    draw_theta(chain);
+    draw_pi(chain, chain.alpha);
+    
+    offset = i*num_save*VV;
+    for(int j=0; j<num_save; j++)
+      for(int k=0; k<VV; k++)
+        REAL(beta_g_out)[offset + j*VV + k] = chain.beta[chain.z[save_index[j]]*VV + k];
+    
+    offset = i*num_save;
+    for(int j=0; j<num_save; j++)
+      REAL(sigma2_g_out)[offset + j] = chain.sigma2[chain.z[save_index[j]]];
+    
+    INTEGER(max_index)[i] = (int) *max_element(chain.z.begin(), chain.z.end());
+  }
+  PutRNGstate();
+  // SET_VECTOR_ELT(list_out, 0, beta_out);
+  // SET_VECTOR_ELT(list_out, 1, pi_out);
+  SET_VECTOR_ELT(list_out, 0, beta_g_out);
+  // SET_VECTOR_ELT(list_out, 3, sigma2_out);
+  SET_VECTOR_ELT(list_out, 1, sigma2_g_out);
+  SET_VECTOR_ELT(list_out, 2, max_index);
+  
+  UNPROTECT(4);
+  
+  return list_out;
+}
+  
+  
+  
+
 extern "C" SEXP dpgmm_initR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP betaR, SEXP piR,
                            SEXP sigma2R, SEXP lambda2R, SEXP alphaR, SEXP aR, SEXP bR, SEXP G, SEXP V, SEXP K, SEXP N, SEXP iter){
   int GG, KK, NN, VV, beta_len, I;
@@ -42,6 +122,7 @@ extern "C" SEXP dpgmm_initR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP betaR, SEXP pi
   SEXP max_index = Ralloc_Int(I);
   SEXP list_out = Ralloc_List(3);
   
+  GetRNGstate();
   for(int i=0; i<I; i++){
     // print_mat(weights, GG, KK);
     compute_weights(chain);
@@ -70,6 +151,7 @@ extern "C" SEXP dpgmm_initR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP betaR, SEXP pi
     
     INTEGER(max_index)[i] = (int) *max_element(chain.z.begin(), chain.z.end());
   }
+  PutRNGstate();
   
   // SET_VECTOR_ELT(list_out, 0, beta_out);
   // SET_VECTOR_ELT(list_out, 1, pi_out);
@@ -114,6 +196,7 @@ extern "C" SEXP dpgmmR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP lambda2R, SEXP alph
   SEXP pi_out = Ralloc_Real(KK*I);
   SEXP list_out = Ralloc_List(3);
   
+  GetRNGstate();
   for(int i=0; i<I; i++){
     // print_mat(weights, GG, KK);
     compute_weights(chain);
@@ -135,7 +218,7 @@ extern "C" SEXP dpgmmR(SEXP yTyR, SEXP xTyR, SEXP xTxR, SEXP lambda2R, SEXP alph
       REAL(pi_out)[offset + j] = chain.pi[j];
       REAL(sigma2_out)[offset + j] = chain.sigma2[j];
     }
-    
+    PutRNGstate();
 //     offset = i*GG*VV;
 //     for(int j=0; j<GG; j++)
 //       for(int k=0; k<VV; k++)
