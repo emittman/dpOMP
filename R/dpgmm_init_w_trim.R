@@ -15,7 +15,7 @@
 #' @export
 dpgmm_init_w_trim <- function(data, design, lambda2, alpha, a, b,  G, V, K, N, iter, init_iter, save_index){
   # run an initial chain
-  init_out <- dpgmm(data=data, design=design, lambda2=lambda2, alpha=alpha,
+  init_out <- dpgmm_return_last(data=data, design=design, lambda2=lambda2, alpha=alpha,
                     a=a, b=b, G=G, V=V, K=K, N=N, iter=init_iter)
   
   yTy <- apply(data, 1, crossprod)
@@ -25,12 +25,10 @@ dpgmm_init_w_trim <- function(data, design, lambda2, alpha, a, b,  G, V, K, N, i
   
   # move most relevant atoms to front of vector
   init <- list()
-  indices <- which(init_out$beta[1,,init_iter] %in% init_out$beta_g[1,,init_iter])
-  anti_indices <- (1:K)[!(1:K %in% indices)]
-  indices <- indices[order(-init_out$pi[indices,init_iter])]
-  init$beta <- init_out$beta[,c(indices, anti_indices),init_iter]
-  init$sigma2 <- init_out$sigma2[c(indices, anti_indices),init_iter]
-  init$pi <- init_out$pi[c(indices, anti_indices),init_iter]
+  indices <- order(init_out$pi, decreasing = T)
+  init$beta <- init_out$beta[,indices]
+  init$sigma2 <- init_out$sigma2[indices]
+  init$pi <- init_out$pi[indices]
   
   num_save <- length(save_index)
   
