@@ -11,7 +11,7 @@ void compute_weights(chain_t &chain){
   int G = chain.G;
   int K = chain.K;
   int V = chain.V;
-#pragma omp parallel for
+//#pragma omp parallel for
   for(int g=0; g<G; g++){
     
     double yTy_g = chain.yTy[g];

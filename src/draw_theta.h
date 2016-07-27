@@ -14,7 +14,7 @@ void draw_theta(chain_t &chain){
   int N = chain.N;
 
   //private k?  
-  #pragma omp parallel for
+  //#pragma omp parallel for
   for(int k = 0; k<K; k++){
     // Rprintf("cluster %d:",k);
     fveci Gkk = chain.Gk.begin() + k;
