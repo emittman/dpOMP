@@ -8,8 +8,8 @@
   * Advice on subsetting from http://stackoverflow.com/questions/421573/best-way-to-extract-a-subvector-from-a-vector
   */
 void draw_z(chain_t &chain){
-// #pragma omp parallel for
   int K = chain.K;
+  // #pragma omp parallel for
   for(int g=0; g<chain.G; g++){
     
     fveci weights_iter = chain.weights.begin() + K*g;
